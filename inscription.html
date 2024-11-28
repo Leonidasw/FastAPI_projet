@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Ma page</title>
+        <link rel="stylesheet" href="/static/css/style.css">
+        <script src="../static/js/script.js"></script>
+    </head>
+    <body>
+        <div class="floater">
+            <h1>Demineur</h1>
+            <h2>S'inscrire ou <button id="inscrire" onclick="location.href = '/login'">se connecter</button></h2>
+            <form action='/soumettre' method="post" onsubmit="return validateForm()">
+                <input type="text" id="user" name="username" placeholder="pseudo" required></input>
+                <br><br>
+                <input type="text" id="pass" name="password" placeholder="mot de passe" required></input>
+                <br><br><br>
+                <button id="confirmer" type="submit">Confirmer</button>
+            </form>
+            <br><br>
+            <blockquote style="font-weight: 800;font-size: x-large; letter-spacing: 0.1em;"> - Le Démineur (Minesweeper) est un jeu vidéo de réflexion dont le but est de localiser des mines cachées dans une grille représentant un champ de mines virtuel, avec pour seule indication le nombre de mines dans les zones adjacentes </blockquote>
+        </div>
+        <script src="../static/js/script.js"></script>
+    </body>
+</html>

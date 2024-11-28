@@ -1,0 +1,46 @@
+body {
+    justify-content: center;
+    align-items: center;
+    background-position: center;
+    display:flex;
+}
+
+.floater {
+    justify-content: center;
+    text-align: center;
+    width:30em;
+    height:50em;
+    background: radial-gradient(rgba(0,0,0,0), rgba(212, 207, 207, 0.6));
+    backdrop-filter: blur(3px);
+    border-radius: 1em;
+    box-shadow: 5px 10px;
+}
+
+#inscrire{
+    height:3em;
+    width:7em;
+    border-radius: 1em;
+    background: white;
+    font-size: medium;
+    font: 0.7em sans-serif;
+}
+
+#user,#pass {
+    text-align: left;
+    font: 0.9em sans-serif;
+    padding: 0.3em; /* Equal padding on all sides */
+    padding-left: 1.5em; /* Additional padding for the left side */
+    margin: 1em;
+    height: 3em;
+    width: 20em;
+    border-radius: 1.5em;
+}
+
+#confirmer {
+    height:3em;
+    width:7em;
+    border-radius: 1em;
+    background: white;
+    font-size: medium;
+    font: 1em sans-serif;
+}
