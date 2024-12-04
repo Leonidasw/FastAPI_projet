@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import Form
+from fastapi import Form, Response
 from fastapi import FastAPI, Request # import de la classe FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -41,43 +41,110 @@ app = FastAPI(lifespan=lifespan) # Création de l application
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-def require_login():
+"""def require_login():
     # Replace with real authentication logic
     authenticated = False  # Simulating that the user is not authenticated
     if not authenticated:
         return RedirectResponse(url="/login")
-    return True
+    return True"""
 
 @app.get("/")
 async def home():
     return RedirectResponse(url="/login")
 
-@app.get("/protected", dependencies=[Depends(require_login)])
+"""@app.get("/protected", dependencies=[Depends(require_login)])
 async def protected():
-    return {"message": "This is a protected route."}
+    return {"message": "This is a protected route."}"""
 
-@app.get("/jeu")
+"""@app.get("/jeu")
+"""
 
-@app.post("/soumettre", response_class=HTMLResponse)
-async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
-    # Process the data here if needed (e.g., save to database, validate, etc.)
-    # Render a new page displaying the submitted data
+def verif_mdp(username,mdp):
     with sqlite3.connect('database.db') as connection:
         cur = connection.cursor()
-        data = cur.execute("SELECT * FROM Joueur").fetchone()
+        db_mdp = cur.execute(f"SELECT user_mdp FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
+    return mdp==db_mdp[0]
 
-    return templates.TemplateResponse(
-        "jeu.html", 
-        {"request": request, "data":data, "username": username, "password": password , 'hashed_username': sha256(username.encode('utf-8')).hexdigest(),'hashed_password': sha256(password.encode('utf-8')).hexdigest()}
-    )
+@app.post("/soumettre_login", response_class=HTMLResponse)
+async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
+    with sqlite3.connect('database.db') as connection:
+        cur = connection.cursor()
+        data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
+        db_mdp = cur.execute(f"SELECT user_mdp FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
+    ### Vérification du mot de passe ####
+    mdp= sha256(password.encode('utf-8')).hexdigest()
+    if verif_mdp(username,mdp):
+        response = templates.TemplateResponse(
+            "profile_page.html", 
+            {"request": request, "username": username, "password": password, 
+            'hashed_password': sha256(password.encode('utf-8')).hexdigest(),
+            'data':data}
+        )
+        response.set_cookie(key="username", value=username)
+        response.set_cookie(key="password", value=password)
+        return response
+    return templates.TemplateResponse('error.html',{'request': request,'message':"Le mot de passe n'est pas bon!"})
+
+#Pour test les cookies
+"""@app.get("/cookie")
+async def get_cookie(request:Request):
+    username = request.cookies.get("username")
+    password = request.cookies.get("password")
+    return templates.TemplateResponse('cookie.html',{'request': request,'username':username,'password':password})"""
+
+@app.get("/logout")
+async def logout(response:Response):
+    response = RedirectResponse(url="/login")
+    response.delete_cookie("username")
+    response.delete_cookie("password")
+    return response
 
 @app.get("/login")
 async def login(request:Request):
-    return templates.TemplateResponse('login.html',{'request': request,'title':'Login page',})
+    username = request.cookies.get("username")
+    if username is None:
+        return templates.TemplateResponse('login.html',{'request': request,'title':'Login page',})
+    return RedirectResponse(url="/profile_page")
+    
 
 @app.get("/inscription")
-def inscription(request:Request):
+async def inscription(request:Request):
     return templates.TemplateResponse('inscription.html',{'request': request,'title':'Inscription page',})
+
+@app.get("/profile_page")
+async def profile_page(request:Request):
+    username = request.cookies.get("username")
+    if username is None:
+        return RedirectResponse(url="/login")
+    password = request.cookies.get("password") 
+    with sqlite3.connect('database.db') as connection:
+        cur = connection.cursor()
+        data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()   
+    return templates.TemplateResponse(
+                "profile_page.html", 
+                {"request": request, "username": username, "password": password, 
+                'hashed_password': sha256(password.encode('utf-8')).hexdigest(),
+                'data':data})        
+
+@app.post("/soumettre_register", response_class=HTMLResponse)
+async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
+    with sqlite3.connect('database.db') as connection:
+        cur = connection.cursor()
+        test_user = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'   ").fetchone()
+        password=sha256(password.encode('utf-8')).hexdigest()
+        if test_user is None:
+            cur.execute(f"INSERT INTO Joueur(user_pseudo, user_mdp) VALUES('{username}','{password}')").fetchone()
+            data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
+            response = templates.TemplateResponse(
+                "profile_page.html", 
+                {"request": request, "username": username, "password": password, 
+                'hashed_password': sha256(password.encode('utf-8')).hexdigest(),
+                'data':data}
+            )
+            response.set_cookie(key="username", value=username)
+            response.set_cookie(key="password", value=password)
+            return response
+        return templates.TemplateResponse('error.html',{'request': request,'message':"Le nom d'utilisateur est déjà utilisé"})
 
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug
