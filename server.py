@@ -70,8 +70,9 @@ async def submit_form(request: Request, username: str = Form(...), password: str
     with sqlite3.connect('database.db') as connection:
         cur = connection.cursor()
         data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
-        db_mdp = cur.execute(f"SELECT user_mdp FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
     ### Vérification du mot de passe ####
+    if data is None:
+        return templates.TemplateResponse('error.html',{'request': request,'message':"Le nom d'utilisateur n'existe pas!"}) 
     mdp= sha256(password.encode('utf-8')).hexdigest()
     if verif_mdp(username,mdp):
         response = templates.TemplateResponse(
@@ -81,16 +82,16 @@ async def submit_form(request: Request, username: str = Form(...), password: str
             'data':data}
         )
         response.set_cookie(key="username", value=username)
-        response.set_cookie(key="password", value=password)
+        response.set_cookie(key="password", value=mdp)
         return response
     return templates.TemplateResponse('error.html',{'request': request,'message':"Le mot de passe n'est pas bon!"})
 
 #Pour test les cookies
-"""@app.get("/cookie")
+@app.get("/cookie")
 async def get_cookie(request:Request):
     username = request.cookies.get("username")
     password = request.cookies.get("password")
-    return templates.TemplateResponse('cookie.html',{'request': request,'username':username,'password':password})"""
+    return templates.TemplateResponse('cookie.html',{'request': request,'username':username,'password':password})
 
 @app.get("/logout")
 async def logout(response:Response):
