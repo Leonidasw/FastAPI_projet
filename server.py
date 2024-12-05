@@ -74,24 +74,18 @@ async def submit_form(request: Request, username: str = Form(...), password: str
     if data is None:
         return templates.TemplateResponse('login.html',{'request': request,'Valide':"Le nom d'utilisateur n'existe pas!"}) 
     mdp= sha256(password.encode('utf-8')).hexdigest()
+    jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
     if verif_mdp(username,mdp):
         response = templates.TemplateResponse(
             "profile_page.html", 
             {"request": request, "username": username, "password": password, 
             'hashed_password': sha256(password.encode('utf-8')).hexdigest(),
-            'data':data}
+            'data':data,'games':jeux}
         )
         response.set_cookie(key="username", value=username)
         response.set_cookie(key="password", value=mdp)
         return response
     return templates.TemplateResponse('login.html',{'request': request,'Valide':"Le mot de passe n'est pas bon!"})
-
-#Pour test les cookies
-@app.get("/cookie")
-async def get_cookie(request:Request):
-    username = request.cookies.get("username")
-    password = request.cookies.get("password")
-    return templates.TemplateResponse('cookie.html',{'request': request,'username':username,'password':password})
 
 @app.get("/logout")
 async def logout(response:Response):
@@ -136,7 +130,7 @@ async def submit_form(request: Request, username: str = Form(...), password: str
         if test_user is None:
             cur.execute(f"INSERT INTO Joueur(user_pseudo, user_mdp) VALUES('{username}','{password}')").fetchone()
             data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
-            jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';")
+            jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
             response = templates.TemplateResponse(
                 "profile_page.html", 
                 {"request": request, "username": username, "password": password, 
@@ -148,7 +142,9 @@ async def submit_form(request: Request, username: str = Form(...), password: str
             return response
         return templates.TemplateResponse('inscription.html',{'request': request,'Valide':"Le nom d'utilisateur est déjà utilisé"})
     
-#test
+@app.get("/demineur")
+async def demineur(request:Request):
+    return templates.TemplateResponse('demineur.html',{'request': request,'title':"Démineur"})
 
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug

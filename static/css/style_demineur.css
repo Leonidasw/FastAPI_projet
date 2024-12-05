@@ -1,0 +1,95 @@
+body {
+    justify-content: center;
+    align-items: center;
+    background-position: center;
+    display:flex;
+    font-family: Arial, sans-serif;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+.floater {
+    justify-content: center;
+    text-align: center;
+    width:30em;
+    height:50em;
+    background: radial-gradient(rgba(0,0,0,0), rgba(212, 207, 207, 0.6));
+    backdrop-filter: blur(3px);
+    border-radius: 1em;
+    box-shadow: 5px 10px;
+}
+
+#inscrire{
+    height:3em;
+    width:7em;
+    border-radius: 1em;
+    background: white;
+    font-size: medium;
+    font: 0.7em sans-serif;
+}
+
+#user,#pass {
+    text-align: left;
+    font: 0.9em sans-serif;
+    padding: 0.3em; /* Equal padding on all sides */
+    padding-left: 1.5em; /* Additional padding for the left side */
+    margin: 1em;
+    height: 3em;
+    width: 20em;
+    border-radius: 1.5em;
+}
+
+#confirmer {
+    height:3em;
+    width:7em;
+    border-radius: 1em;
+    background: white;
+    font-size: medium;
+    font: 1em sans-serif;
+    transition: 800ms;
+}
+
+#confirmer:hover {
+    border-color: rgb(17, 199, 17);
+    color: rgb(17, 199, 17);
+    transition:800ms;
+}
+
+#scompte:hover{
+    border-color: rgb(185, 177, 177) ;
+    box-shadow: 1px 2px;
+    transition: 300ms;
+}
+
+#game-container {
+    display: grid;
+    gap: 2px;
+    margin-top: 20px;
+  }
+  
+  .cell {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    border: 1px solid #ccc;
+    background-color: #d3d3d3;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .cell.revealed {
+    background-color: #f9f9f9;
+    cursor: default;
+  }
+  
+  .cell.flagged {
+    background-color: #ffcccb;
+  }
+  
+  .cell.mine {
+    background-color: #ff4d4d;
+  }
