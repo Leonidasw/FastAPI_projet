@@ -5,10 +5,12 @@
     </head>
     <body>
         <h1>Form Submitted Successfully</h1>
+        <h2>Bonjour, {{ username }}</h2>
         <p>SQL DATA: {{ data }}</p>
         <p>Username: {{ username }}</p>
         <p>Password: {{ password }}</p>
         <p>SHA-256 Hashed Password: {{ hashed_password }}</p>
+        <p>Jeux gagnés: {{ games }}</p>
         <a href="/logout">Logout</a>
         <a href="/cookie">Test Cookie</a>
     </body>
