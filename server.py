@@ -147,6 +147,8 @@ async def submit_form(request: Request, username: str = Form(...), password: str
             response.set_cookie(key="password", value=password)
             return response
         return templates.TemplateResponse('inscription.html',{'request': request,'Valide':"Le nom d'utilisateur est déjà utilisé"})
+    
+#test
 
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug
