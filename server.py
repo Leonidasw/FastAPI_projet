@@ -75,12 +75,11 @@ async def submit_form(request: Request, username: str = Form(...), password: str
         return templates.TemplateResponse('login.html',{'request': request,'Valide':"Le nom d'utilisateur n'existe pas!"}) 
     mdp= sha256(password.encode('utf-8')).hexdigest()
     jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
+    temps = cur.execute(f"SELECT MIN(Score.time_jeu) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
     if verif_mdp(username,mdp):
         response = templates.TemplateResponse(
             "profile_page.html", 
-            {"request": request, "username": username, "password": password, 
-            'hashed_password': sha256(password.encode('utf-8')).hexdigest(),
-            'data':data,'games':jeux}
+            {"request": request, "username": username, "password": password,'games':jeux,'time':temps}
         )
         response.set_cookie(key="username", value=username)
         response.set_cookie(key="password", value=mdp)
@@ -117,9 +116,7 @@ async def profile_page(request:Request):
         data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()   
     return templates.TemplateResponse(
                 "profile_page.html", 
-                {"request": request, "username": username, "password": password, 
-                'hashed_password': sha256(password.encode('utf-8')).hexdigest(),
-                'data':data})        
+                {"request": request, "username": username})        
 
 @app.post("/soumettre_register", response_class=HTMLResponse)
 async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
@@ -129,13 +126,11 @@ async def submit_form(request: Request, username: str = Form(...), password: str
         password=sha256(password.encode('utf-8')).hexdigest()
         if test_user is None:
             cur.execute(f"INSERT INTO Joueur(user_pseudo, user_mdp) VALUES('{username}','{password}')").fetchone()
-            data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
             jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
+            temps = cur.execute(f"SELECT MIN(Score.time_jeu) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
             response = templates.TemplateResponse(
                 "profile_page.html", 
-                {"request": request, "username": username, "password": password, 
-                'hashed_password': sha256(password.encode('utf-8')).hexdigest(),
-                'data':data , 'games':jeux}
+                {"request": request, "username": username,'games':jeux, 'time':temps}
             )
             response.set_cookie(key="username", value=username)
             response.set_cookie(key="password", value=password)
@@ -145,6 +140,25 @@ async def submit_form(request: Request, username: str = Form(...), password: str
 @app.get("/demineur")
 async def demineur(request:Request):
     return templates.TemplateResponse('demineur.html',{'request': request,'title':"Démineur"})
+
+@app.get('/leaderboard')
+async def leaderboard(request:Request):
+    with sqlite3.connect('database.db') as connection:
+        cur = connection.cursor()
+        data = cur.execute(f"SELECT Joueur.user_pseudo,Score.time_jeu,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.time_jeu ASC").fetchall()
+        wins = cur.execute(f"SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()
+    return templates.TemplateResponse(
+        'leaderboard.html',
+        {
+            'request': request,
+            'title': "Leaderboard",
+            'score': data,
+            'wins':wins,
+            'enumerate': enumerate  # Add `enumerate` to the template context
+        }
+    )
+
+
 
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug

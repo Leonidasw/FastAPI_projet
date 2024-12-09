@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Time (seconds)</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for index, entry in enumerate(score, start=1) %}
+            <tr>
+                <td>{{ index }}</td>
+                <td>{{ entry[0] }}</td> <!-- user_pseudo -->
+                <td>{{ entry[1] }}</td> <!-- time_jeu -->
+                <td>{{ entry[2] }}</td> <!-- date_jeu -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Wins</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for index, entry in enumerate(wins, start=1) %}
+            <tr>
+                <td>{{ index }}</td>
+                <td>{{ entry[0] }}</td> <!-- user_pseudo -->
+                <td>{{ entry[1] }}</td> <!-- time_jeu -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

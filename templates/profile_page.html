@@ -2,16 +2,24 @@
 <html>
     <head>
         <title>Data</title>
+        <link rel="stylesheet" href="/static/css/style_profile.css">
     </head>
     <body>
-        <h1>Form Submitted Successfully</h1>
         <h2>Bonjour, {{ username }}</h2>
-        <p>SQL DATA: {{ data }}</p>
-        <p>Username: {{ username }}</p>
-        <p>Password: {{ password }}</p>
-        <p>SHA-256 Hashed Password: {{ hashed_password }}</p>
         <p>Jeux gagnés: {{ games }}</p>
+        <p>Votre meilleur temps: {{ time }}</p>
         <a href="/logout">Logout</a>
-        <a href="/demineur">Demineur</a>
+        <button id="demineurButton" onload="drawDemineurBoard()" onclick="location.href = '/demineur'">
+            <span class="buttonText">Démineur</span>
+            <br><br>
+            <canvas id="demineurCanvas" width="60" height="60"></canvas>
+        </button>
+            
+        <button id="leaderboardButton" onload="leaderboard()" onclick="location.href = '/leaderboard'">
+            <span class="buttonText">Leaderboard</span>
+            <br><br>
+            <canvas id="leaderboardCanvas" width="100" height="60"></canvas>
+        </button>
+        <script src="../static/js/profile.js"></script>
     </body>
 </html>

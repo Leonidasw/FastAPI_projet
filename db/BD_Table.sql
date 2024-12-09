@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS Score (
     id_score INTEGER PRIMARY KEY AUTOINCREMENT,  -- Clé primaire auto-incrémentée
     date_jeu DATETIME DEFAULT CURRENT_TIMESTAMP, -- Date de la partie jouée, par défaut = date actuelle
     id_user INTEGER,                             -- Clé étrangère référencée depuis la table Joueur
-    score_jeu INTEGER NOT NULL,                  -- Score du jeu
     difficulte_jeu TEXT,                         -- Difficulté du jeu
     time_jeu REAL,                               -- Temps de jeu
     custom BOOL,                                 -- Partie personnalisée
