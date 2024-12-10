@@ -289,7 +289,7 @@ def action_joueur(action: str, position_actuelle: tuple, plateau_jeu: list, plat
 """
 
 
-nb_mines = 3
+"""nb_mines = 3
 taille = 5
 
 case_joueur=(1,1)
@@ -305,9 +305,9 @@ decouvre_0_recursif(plateau_jeu, plateau_statut, 0)
 afficher_plateau(plateau_jeu,plateau_statut)
 
 
-#afficher_plateau_tkinter(plateau_jeu)
+#afficher_plateau_tkinter(plateau_jeu)"""
 
-game = True
+"""game = True
 while game:
     afficher_plateau(plateau_jeu, plateau_statut)
     print(f"Position actuelle du joueur : {case_joueur}")
@@ -334,6 +334,6 @@ while game:
                 nb_mark += 1
     if nb_covered == nb_mines:
         print("Félicitations, vous avez gagné !")
-        game = False
+        game = False"""
 
 

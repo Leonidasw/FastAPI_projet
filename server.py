@@ -151,7 +151,52 @@ async def leaderboard(request:Request):
         }
     )
 
+from demineur_proj import init_plateau_mine, liste_voisins
 
+@app.get("/demineur/facile")
+async def demineur_facile(request:Request):
+    nb_mines = 5
+    taille = 5
+    case_joueur=(1,1)
+    case_U= liste_voisins(case_joueur, taille)+[case_joueur]
+    plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+    return templates.TemplateResponse(
+        'demineur.html',
+        {
+            'request':request,
+            'plateau':plateau_jeu
+        }
+    )
+
+@app.get("/demineur/moyen")
+async def demineur_moyen(request:Request):
+    nb_mines = 15
+    taille = 10
+    case_joueur=(1,1)
+    case_U= liste_voisins(case_joueur, taille)+[case_joueur]
+    plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+    return templates.TemplateResponse(
+        'demineur.html',
+        {
+            'request':request,
+            'plateau':plateau_jeu
+        }
+    )
+
+@app.get("/demineur/difficile")
+async def demineur_difficile(request:Request):
+    nb_mines = 30
+    taille = 15
+    case_joueur=(1,1)
+    case_U= liste_voisins(case_joueur, taille)+[case_joueur]
+    plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+    return templates.TemplateResponse(
+        'demineur.html',
+        {
+            'request':request,
+            'plateau':plateau_jeu
+        }
+    )
 
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug

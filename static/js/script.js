@@ -25,12 +25,14 @@ function validateForm() { /* pas nécéssaire pour le moment*/
 // script.js
 
 // Exemple de matrice générée par Python
-const solutionMatrix = [
-    ["1", "M", "1"],
-    ["2", "3", "M"],
-    ["M", "3", "1"],
-  ];
-  
+//const solutionMatrix = [
+//    ["1", "9", "2"],
+//    ["2", "3", "9"],
+//    ["9", "3", "1"],
+//  ];
+
+  const element = document.getElementById('test');
+  const solutionMatrix = JSON.parse(element.textContent);
   // Génère la grille dans le conteneur
   const gameContainer = document.getElementById("game-container");
   const rows = solutionMatrix.length;
@@ -47,7 +49,7 @@ const solutionMatrix = [
     cell.classList.add("revealed");
     const value = solutionMatrix[row][col];
   
-    if (value === "M") {
+    if (value === 9) {
       cell.classList.add("mine");
       cell.textContent = "💣";
       alert("Game Over!");
