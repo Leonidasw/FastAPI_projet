@@ -74,13 +74,8 @@ async def submit_form(request: Request, username: str = Form(...), password: str
     if data is None:
         return templates.TemplateResponse('login.html',{'request': request,'Valide':"Le nom d'utilisateur n'existe pas!"}) 
     mdp= sha256(password.encode('utf-8')).hexdigest()
-    jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
-    temps = cur.execute(f"SELECT MIN(Score.time_jeu) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
     if verif_mdp(username,mdp):
-        response = templates.TemplateResponse(
-            "profile_page.html", 
-            {"request": request, "username": username, "password": password,'games':jeux,'time':temps}
-        )
+        response = RedirectResponse(url="/profile_page",status_code=303)
         response.set_cookie(key="username", value=username)
         response.set_cookie(key="password", value=mdp)
         return response
@@ -103,6 +98,9 @@ async def login(request:Request):
 
 @app.get("/inscription")
 async def inscription(request:Request):
+    username = request.cookies.get("username")
+    if username is not None:
+        return RedirectResponse(url="/profile_page")
     return templates.TemplateResponse('inscription.html',{'request': request,'title':'Inscription page',})
 
 @app.get("/profile_page")
@@ -110,13 +108,13 @@ async def profile_page(request:Request):
     username = request.cookies.get("username")
     if username is None:
         return RedirectResponse(url="/login")
-    password = request.cookies.get("password") 
     with sqlite3.connect('database.db') as connection:
         cur = connection.cursor()
-        data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()   
+    jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
+    temps = cur.execute(f"SELECT MIN(Score.time_jeu) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
     return templates.TemplateResponse(
                 "profile_page.html", 
-                {"request": request, "username": username})        
+                {"request": request, "username": username,"games":jeux,"time":temps})        
 
 @app.post("/soumettre_register", response_class=HTMLResponse)
 async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
@@ -126,12 +124,7 @@ async def submit_form(request: Request, username: str = Form(...), password: str
         password=sha256(password.encode('utf-8')).hexdigest()
         if test_user is None:
             cur.execute(f"INSERT INTO Joueur(user_pseudo, user_mdp) VALUES('{username}','{password}')").fetchone()
-            jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
-            temps = cur.execute(f"SELECT MIN(Score.time_jeu) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
-            response = templates.TemplateResponse(
-                "profile_page.html", 
-                {"request": request, "username": username,'games':jeux, 'time':temps}
-            )
+            response =  RedirectResponse(url="/profile_page",status_code=303)
             response.set_cookie(key="username", value=username)
             response.set_cookie(key="password", value=password)
             return response
