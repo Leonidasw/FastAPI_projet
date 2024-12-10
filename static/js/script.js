@@ -88,3 +88,15 @@ function validateForm() { /* pas nécéssaire pour le moment*/
     }
   }
   
+
+  async function callPythonFunction() {
+    const url = 'http://127.0.0.1:8000/simple_function'; // L'URL de ton endpoint
+
+    try {
+        const response = await fetch(url); // Requête GET simple
+        const result = await response.json(); // Parse le résultat JSON
+        console.log(result); // Affiche {"result": "Hello, World!"}
+    } catch (error) {
+        console.error("Erreur :", error);
+    }
+}

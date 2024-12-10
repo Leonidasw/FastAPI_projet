@@ -198,5 +198,10 @@ async def demineur_difficile(request:Request):
         }
     )
 
+@app.get("/simple_function")
+def simple_function():
+    return {"result": "Hello, World!"}
+
+
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug
