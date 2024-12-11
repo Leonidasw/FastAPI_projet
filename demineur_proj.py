@@ -46,7 +46,6 @@ voisines aux mines compte le nombre de mines adjacentes.
     """
     taille = len(plateau)
     for mine in liste_mines:
-        x_mine, y_mine = mine
         voisins = liste_voisins(mine, taille)
         for voisin in voisins:
             x_voisin, y_voisin = voisin

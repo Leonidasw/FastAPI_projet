@@ -138,8 +138,8 @@ async def demineur(request:Request):
 async def leaderboard(request:Request):
     with sqlite3.connect('database.db') as connection:
         cur = connection.cursor()
-        data = cur.execute(f"SELECT Joueur.user_pseudo,Score.time_jeu,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.time_jeu ASC").fetchall()
-        wins = cur.execute(f"SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()
+        data = cur.execute("SELECT Joueur.user_pseudo,Score.time_jeu,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.time_jeu ASC").fetchall()
+        wins = cur.execute("SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()
     return templates.TemplateResponse(
         'leaderboard.html',
         {
@@ -155,53 +155,66 @@ from demineur_proj import init_plateau_mine, liste_voisins
 
 @app.get("/demineur/facile")
 async def demineur_facile(request:Request):
-    nb_mines = 5
-    taille = 5
-    case_joueur=(1,1)
-    case_U= liste_voisins(case_joueur, taille)+[case_joueur]
-    plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
-    return templates.TemplateResponse(
+    response =templates.TemplateResponse(
         'demineur.html',
         {
             'request':request,
-            'plateau':plateau_jeu
+            'difficulty':"facile"
         }
     )
+    response.set_cookie(key="difficulty", value="facile")
+    return response
 
 @app.get("/demineur/moyen")
 async def demineur_moyen(request:Request):
-    nb_mines = 15
-    taille = 10
-    case_joueur=(1,1)
-    case_U= liste_voisins(case_joueur, taille)+[case_joueur]
-    plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
-    return templates.TemplateResponse(
+    response= templates.TemplateResponse(
         'demineur.html',
         {
             'request':request,
-            'plateau':plateau_jeu
+            'difficulty':"moyen"
         }
     )
+    response.set_cookie(key="difficulty", value="moyen")
+    return response
+
 
 @app.get("/demineur/difficile")
 async def demineur_difficile(request:Request):
-    nb_mines = 30
-    taille = 15
-    case_joueur=(1,1)
-    case_U= liste_voisins(case_joueur, taille)+[case_joueur]
-    plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
-    return templates.TemplateResponse(
+    response= templates.TemplateResponse(
         'demineur.html',
         {
             'request':request,
-            'plateau':plateau_jeu
+            'difficulty':"difficile"
         }
     )
+    response.set_cookie(key="difficulty", value="difficile")
+    return response
 
-@app.get("/simple_function")
-def simple_function():
-    return {"result": "Hello, World!"}
 
+@app.get("/demineur/get_mine")
+async def get_mine(request:Request):
+    difficulty = request.cookies.get("difficulty")
+    if difficulty=="facile":
+        nb_mines = 5
+        taille = 5
+        case_joueur=(1,1)
+        case_U= liste_voisins(case_joueur, taille)+[case_joueur]
+        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+    elif difficulty=="moyen":
+        nb_mines = 15
+        taille = 10
+        case_joueur=(1,1)
+        case_U= liste_voisins(case_joueur, taille)+[case_joueur]
+        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
+    elif difficulty=="difficile":
+        nb_mines = 30
+        taille = 15
+        case_joueur=(1,1)
+        case_U= liste_voisins(case_joueur, taille)+[case_joueur]
+        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+    else:
+        return "Erreur"
+    return plateau_jeu
 
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug
