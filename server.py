@@ -190,14 +190,25 @@ async def demineur_difficile(request:Request):
     response.set_cookie(key="difficulty", value="difficile")
     return response
 
-
+import time
+debut=-1
+@app.get("/timer") 
+def timer():
+    global debut #Faute de solution, j'utilise un global
+    if debut==-1:
+        debut=time.perf_counter()
+    else:
+        return round(float(time.perf_counter())-float(debut),2)
+    
 @app.get("/demineur/get_mine")
 async def get_mine(request:Request):
+    global debut
+    debut=-1
     difficulty = request.cookies.get("difficulty")
     if difficulty=="facile":
         nb_mines = 5
         taille = 5
-        case_joueur=(1,1)
+        case_joueur=(0,0)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
     elif difficulty=="moyen":
