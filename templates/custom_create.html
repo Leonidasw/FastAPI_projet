@@ -7,5 +7,78 @@
 </head>
 <body>
     <p>Customiser un plateau de jeu</p>
+    <p>Selectionner une taille:</p>
+    <input id='range_t' type="range" min="1" max="15" value="8"><p id="demo"></p>
+    <style>
+        #game-container {
+      display: grid;
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      line-height: 40px;
+      border: 1px solid #ccc;
+      background-color: #d3d3d3;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .cell.revealed {
+      background-color: #f9f9f9;
+      cursor: default;
+    }
+    </style>
+
+    <div id="game-container"></div>
+    <script>
+        var slider = document.getElementById("range_t");
+        var output = document.getElementById("demo");
+        output.innerHTML = slider.value;
+        slider.oninput = function() {
+            output.innerHTML = this.value+'x'+this.value;
+            slider.value = this.value
+            const gameContainer = document.getElementById("game-container");
+            gameContainer.innerHTML=''
+            async function initBoard(rows, cols) {
+                gameContainer.style.gridTemplateRows = `repeat(${rows},40px)`;
+                gameContainer.style.gridTemplateColumns = `repeat(${cols},40px)`;
+
+                // Generate cells
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                    const cell = document.createElement("div");
+                    cell.classList.add("cell");
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+
+                    // Placeholder click functionality
+                    cell.addEventListener("click", () => {
+                        if (cell.classList.contains("mine")){
+                            cell.classList.remove("mine");
+                            cell.textContent = '';
+                            cell.style.background='#d3d3d3';
+
+                        } else {
+                            cell.classList.add("mine");
+                            cell.textContent = "💣";
+                            cell.style.background='#ff4d4d';
+                        }
+                        //cell.classList.add("revealed");
+                    });
+
+                    gameContainer.appendChild(cell);
+                    }
+                }
+            }
+
+            // Initialize the board with custom size
+            initBoard(slider.value, slider.value); // Example: 5x5 grid
+
+        }
+    
+    </script>
 </body>
 </html>
