@@ -9,12 +9,14 @@ from fastapi.staticfiles import StaticFiles
 from hashlib import sha256
 from contextlib import asynccontextmanager
 import sqlite3
+import os
 
+dbpath = os.path.join(os.path.dirname(__file__), "db", "database.db")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ouvrir la connexion SQLite au démarrage de l'application
-    connection = sqlite3.connect("database.db")
+    connection = sqlite3.connect(dbpath)
     cursor = connection.cursor()
 
     # Exécuter le script SQL uniquement si les tables n'existent pas déjà
@@ -60,14 +62,14 @@ async def protected():
 """
 
 def verif_mdp(username,mdp):
-    with sqlite3.connect('database.db') as connection:
+    with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         db_mdp = cur.execute(f"SELECT user_mdp FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
     return mdp==db_mdp[0]
 
 @app.post("/soumettre_login", response_class=HTMLResponse)
 async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
-    with sqlite3.connect('database.db') as connection:
+    with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
     ### Vérification du mot de passe ####
@@ -108,7 +110,7 @@ async def profile_page(request:Request):
     username = request.cookies.get("username")
     if username is None:
         return RedirectResponse(url="/login")
-    with sqlite3.connect('database.db') as connection:
+    with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
     jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
     temps = cur.execute(f"SELECT MIN(Score.time_jeu) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
@@ -118,7 +120,7 @@ async def profile_page(request:Request):
 
 @app.post("/soumettre_register", response_class=HTMLResponse)
 async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
-    with sqlite3.connect('database.db') as connection:
+    with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         test_user = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'   ").fetchone()
         password=sha256(password.encode('utf-8')).hexdigest()
@@ -132,13 +134,14 @@ async def submit_form(request: Request, username: str = Form(...), password: str
     
 @app.get("/demineur")
 async def demineur(request:Request):
-    return templates.TemplateResponse('demineur.html',{'request': request,'title':"Démineur"})
+    return RedirectResponse(url="/demineur/facile",status_code=303)
+    #return templates.TemplateResponse('demineur.html',{'request': request,'title':"Démineur", 'inscrit':''})
 
 @app.get('/leaderboard')
 async def leaderboard(request:Request):
-    with sqlite3.connect('database.db') as connection:
+    with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
-        data = cur.execute("SELECT Joueur.user_pseudo,Score.time_jeu,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.time_jeu ASC").fetchall()
+        data = cur.execute("SELECT Joueur.user_pseudo,Score.time_jeu,Score.date_jeu,Score.difficulte_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.time_jeu ASC").fetchall()
         wins = cur.execute("SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()
     return templates.TemplateResponse(
         'leaderboard.html',
@@ -151,28 +154,64 @@ async def leaderboard(request:Request):
         }
     )
 
+@app.get('/custom_create')
+async def create_board(request:Request):
+    username = request.cookies.get("username")
+    if username is None:
+        return RedirectResponse(url="/login")
+    return templates.TemplateResponse(
+        "custom_create.html", 
+        {"request": request})    
+
+
 from demineur_proj import init_plateau_mine, liste_voisins
 
 @app.get("/demineur/facile")
 async def demineur_facile(request:Request):
+    username = request.cookies.get("username")
+    if username is None:
+        response =templates.TemplateResponse(
+            'demineur.html',
+            {
+                'request':request,
+                'difficulty':"facile",
+                'inscrit': "Vous n'etes pas inscrit"
+            }
+        )
+        response.set_cookie(key="difficulty", value="facile")
+        return response
     response =templates.TemplateResponse(
-        'demineur.html',
-        {
-            'request':request,
-            'difficulty':"facile"
-        }
+            'demineur.html',
+            {
+                'request':request,
+                'difficulty':"facile",
+                'inscrit': f"Vous etes inscrit comme {username}"
+            }
     )
     response.set_cookie(key="difficulty", value="facile")
     return response
 
 @app.get("/demineur/moyen")
 async def demineur_moyen(request:Request):
-    response= templates.TemplateResponse(
-        'demineur.html',
-        {
-            'request':request,
-            'difficulty':"moyen"
-        }
+    username = request.cookies.get("username")
+    if username is None:
+        response =templates.TemplateResponse(
+            'demineur.html',
+            {
+                'request':request,
+                'difficulty':"moyen",
+                'inscrit': "Vous n'etes pas inscrit"
+            }
+        )
+        response.set_cookie(key="difficulty", value="moyen")
+        return response
+    response =templates.TemplateResponse(
+            'demineur.html',
+            {
+                'request':request,
+                'difficulty':"moyen",
+                'inscrit': f"Vous etes inscrit comme {username}"
+            }
     )
     response.set_cookie(key="difficulty", value="moyen")
     return response
@@ -180,12 +219,25 @@ async def demineur_moyen(request:Request):
 
 @app.get("/demineur/difficile")
 async def demineur_difficile(request:Request):
-    response= templates.TemplateResponse(
-        'demineur.html',
-        {
-            'request':request,
-            'difficulty':"difficile"
-        }
+    username = request.cookies.get("username")
+    if username is None:
+        response =templates.TemplateResponse(
+            'demineur.html',
+            {
+                'request':request,
+                'difficulty':"difficile",
+                'inscrit': "Vous n'etes pas inscrit"
+            }
+        )
+        response.set_cookie(key="difficulty", value="difficile")
+        return response
+    response =templates.TemplateResponse(
+            'demineur.html',
+            {
+                'request':request,
+                'difficulty':"difficile",
+                'inscrit': f"Vous etes inscrit comme {username}"
+            }
     )
     response.set_cookie(key="difficulty", value="difficile")
     return response

@@ -8,7 +8,6 @@
         <h2>Bonjour, {{ username }}</h2>
         <p>Jeux gagnés: {{ games }}</p>
         <p>Votre meilleur temps: {{ time }}</p>
-        <a href="/logout">Logout</a>
         <button id="demineurButton" onload="drawDemineurBoard()" onclick="location.href = '/demineur'">
             <span class="buttonText">Démineur</span>
             <br><br>
@@ -20,6 +19,14 @@
             <br><br>
             <canvas id="leaderboardCanvas" width="100" height="60"></canvas>
         </button>
+
+        <button id="customButton" onload="drawCustomBoard()" onclick="location.href = '/custom_create'">
+            <span class="buttonText">Custom Board</span>
+            <br><br>
+            <canvas id="customCanvas" width="60" height="60"></canvas>
+        </button>
         <script src="../static/js/profile.js"></script>
+        <br><br>
+        <a href="/logout">Se déconnecter</a>
     </body>
 </html>

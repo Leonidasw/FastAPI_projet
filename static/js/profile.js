@@ -125,3 +125,42 @@ function leaderboard() {
     drawRect(lb_cellSize*2+5, 40, '#243191','2',-lb_cellSize+4);
 }
 leaderboard();
+
+const ctm_canvas = document.getElementById("customCanvas");
+const ctm_ctx = ctm_canvas.getContext("2d");
+
+// Taille des cases
+const ctm_cellSize = 20;
+
+// Fonction pour dessiner une cellule vide avec style
+function ctm_drawCovered(x, y, fillColor) {
+    ctm_ctx.fillStyle = fillColor;
+    ctm_ctx.fillRect(x, y, ctm_cellSize, ctm_cellSize);
+
+    ctm_ctx.fillStyle = colors.covered;
+    ctm_ctx.beginPath();
+    ctm_ctx.arc(x + ctm_cellSize / 2, y + ctm_cellSize / 2, ctm_cellSize / 5, 0, 2 * Math.PI);
+    ctm_ctx.fill();
+
+    // Ajouter une bordure
+    ctm_ctx.strokeStyle = colors.border;
+    ctm_ctx.strokeRect(x, y, ctm_cellSize, ctm_cellSize);
+}
+
+function drawCustomBoard() {
+    // Première ligne 
+    ctm_drawCovered(0, 0, colors.empty);
+    ctm_drawCovered(ctm_cellSize, 0, colors.empty);
+    ctm_drawCovered(ctm_cellSize*2, 0, colors.empty);
+
+    // Deuxième ligne 
+    ctm_drawCovered(0, ctm_cellSize, colors.empty);
+    ctm_drawCovered(ctm_cellSize,ctm_cellSize, colors.empty);
+    ctm_drawCovered(ctm_cellSize*2, ctm_cellSize, colors.empty);
+
+    ctm_drawCovered(0, ctm_cellSize*2, colors.empty);
+    ctm_drawCovered(ctm_cellSize,ctm_cellSize*2, colors.empty);
+    ctm_drawCovered(ctm_cellSize*2, ctm_cellSize*2, colors.empty);
+}
+
+drawCustomBoard()
