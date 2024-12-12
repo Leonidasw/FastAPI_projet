@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import Form, Response
 from fastapi import FastAPI, Request # import de la classe FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
@@ -154,7 +154,15 @@ async def create_board(request:Request):
         return RedirectResponse(url="/login")
     return templates.TemplateResponse(
         "custom_create.html", 
-        {"request": request})    
+        {"request": request})  
+@app.get('/custom_create_william')
+async def create_board(request:Request):
+    username = request.cookies.get("username")
+    if username is None:
+        return RedirectResponse(url="/login")
+    return templates.TemplateResponse(
+        "custom_create_william.html", 
+        {"request": request})      
 
 
 from init_champ import init_plateau_mine, liste_voisins
@@ -234,6 +242,20 @@ async def demineur_difficile(request:Request):
     )
     response.set_cookie(key="difficulty", value="difficile")
     return response
+
+from pydantic import BaseModel
+class Score(BaseModel):
+    score: str
+
+@app.post("/demineur/score")
+async def score(score: Score,request:Request):
+    username=request.cookies.get("username")
+    difficulty=request.cookies.get("difficulty")
+    with sqlite3.connect(dbpath) as connection:
+        cur = connection.cursor()
+        id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
+        cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,time_jeu,custom) VALUES({id_user},'{difficulty}','{score.score}',False)").fetchone()
+    return JSONResponse(content=score.score)  # Renvoie le score reçu
     
 @app.get("/demineur/get_mine")
 async def get_mine(request:Request):
