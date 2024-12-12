@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS Score (
     date_jeu DATETIME DEFAULT CURRENT_TIMESTAMP, -- Date de la partie jouée, par défaut = date actuelle
     id_user INTEGER,                             -- Clé étrangère référencée depuis la table Joueur
     difficulte_jeu TEXT,                         -- Difficulté du jeu
-    time_jeu REAL,                               -- Temps de jeu
+    time_jeu TEXT,                               -- Temps de jeu
     custom BOOL,                                 -- Partie personnalisée
     FOREIGN KEY (id_user) REFERENCES Joueur (id_user)
 );

@@ -138,6 +138,7 @@ async function init(){
       game=false
       temps=document.getElementById("timer")
       alert("Vous avez gagné ! Félicitations ! Votre temps est de "+temps.textContent);
+      send_score(temps.textContent)
     }
   }
   // Timer
@@ -189,6 +190,20 @@ async function init(){
         }
       });
     }
+  }
+
+  async function send_score(score){
+    console.log("Envoi du score:", score);  // Affiche le score avant envoi
+    const url = 'http://127.0.0.1:8000/demineur/score'
+    fetch(url,{
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ score: score }),
+    })
+    .then(response => response.json())
+    .then(data => {console.log(data)});
   }
 
 

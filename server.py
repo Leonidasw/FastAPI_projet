@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import Form, Response
 from fastapi import FastAPI, Request # import de la classe FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
@@ -42,13 +42,6 @@ app = FastAPI(lifespan=lifespan) # Création de l application
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
-"""def require_login():
-    # Replace with real authentication logic
-    authenticated = False  # Simulating that the user is not authenticated
-    if not authenticated:
-        return RedirectResponse(url="/login")
-    return True"""
 
 @app.get("/")
 async def home():
@@ -126,7 +119,7 @@ async def submit_form(request: Request, username: str = Form(...), password: str
         return templates.TemplateResponse('inscription.html',{'request': request,'Valide':"Le nom d'utilisateur est déjà utilisé"})
     
 @app.get("/demineur")
-async def demineur(request:Request):
+async def demineur():
     return RedirectResponse(url="/demineur/facile",status_code=303)
     #return templates.TemplateResponse('demineur.html',{'request': request,'title':"Démineur", 'inscrit':''})
 
@@ -147,7 +140,7 @@ async def leaderboard(request:Request):
         }
     )
 
-@app.get('/custom_create')
+@app.get('/demineur/custom_create')
 async def create_board(request:Request):
     username = request.cookies.get("username")
     if username is None:
@@ -156,6 +149,19 @@ async def create_board(request:Request):
         "custom_create.html", 
         {"request": request})    
 
+from pydantic import BaseModel
+class Score(BaseModel):
+    score: str
+
+@app.post("/demineur/score")
+async def score(score: Score,request:Request):
+    username=request.cookies.get("username")
+    difficulty=request.cookies.get("difficulty")
+    with sqlite3.connect(dbpath) as connection:
+        cur = connection.cursor()
+        id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
+        cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,time_jeu,custom) VALUES({id_user},'{difficulty}','{score.score}',False)").fetchone()
+    return JSONResponse(content=score.score)  # Renvoie le score reçu
 
 from init_champ import init_plateau_mine, liste_voisins
 
@@ -239,21 +245,21 @@ async def demineur_difficile(request:Request):
 async def get_mine(request:Request):
     difficulty = request.cookies.get("difficulty")
     if difficulty=="facile":
-        nb_mines = 5
         taille = 5
+        nb_mines = taille*taille*0.2
         case_joueur=(0,0)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
     elif difficulty=="moyen":
-        nb_mines = 15
         taille = 10
-        case_joueur=(1,1)
+        nb_mines = taille*taille*0.2
+        case_joueur=(0,0)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
     elif difficulty=="difficile":
-        nb_mines = 30
         taille = 15
-        case_joueur=(1,1)
+        nb_mines = taille*taille*0.2
+        case_joueur=(0,0)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
     else:

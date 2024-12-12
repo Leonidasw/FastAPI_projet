@@ -1,6 +1,4 @@
-import tkinter as tk
 from random import randint
-from enum import Enum
 
 def init_plateau(taille:int, val:int)->list:
     """
@@ -65,18 +63,6 @@ mines avec le nombre de mines adjacentes dans les cases sans mines.
         plateau[x_mine][y_mine] = 9
     plateau = init_compte(plateau, liste_mines)
     return plateau
-
-class Status(Enum):
-    COVERED = 1
-    UNCOVERED = 2
-    MARK = 3
-
-
-def init_statut_plateau(taille:int)->list:
-    """
-    Hyp: Initialise le plateau de statut pour voir tout le plateau
-    """
-    return [[Status.COVERED for _ in range(taille)] for _ in range(taille)]
     
 
 
