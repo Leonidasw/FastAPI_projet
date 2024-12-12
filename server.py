@@ -54,13 +54,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def home():
     return RedirectResponse(url="/login")
 
-"""@app.get("/protected", dependencies=[Depends(require_login)])
-async def protected():
-    return {"message": "This is a protected route."}"""
-
-"""@app.get("/jeu")
-"""
-
 def verif_mdp(username,mdp):
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
@@ -164,7 +157,7 @@ async def create_board(request:Request):
         {"request": request})    
 
 
-from demineur_proj import init_plateau_mine, liste_voisins
+from init_champ import init_plateau_mine, liste_voisins
 
 @app.get("/demineur/facile")
 async def demineur_facile(request:Request):
@@ -175,7 +168,7 @@ async def demineur_facile(request:Request):
             {
                 'request':request,
                 'difficulty':"facile",
-                'inscrit': "Vous n'etes pas inscrit"
+                'inscrit': "Vous n'êtes pas inscrit"
             }
         )
         response.set_cookie(key="difficulty", value="facile")
@@ -185,7 +178,7 @@ async def demineur_facile(request:Request):
             {
                 'request':request,
                 'difficulty':"facile",
-                'inscrit': f"Vous etes inscrit comme {username}"
+                'inscrit': f"Vous êtes inscrit comme {username}"
             }
     )
     response.set_cookie(key="difficulty", value="facile")
@@ -200,7 +193,7 @@ async def demineur_moyen(request:Request):
             {
                 'request':request,
                 'difficulty':"moyen",
-                'inscrit': "Vous n'etes pas inscrit"
+                'inscrit': "Vous n'êtes pas inscrit"
             }
         )
         response.set_cookie(key="difficulty", value="moyen")
@@ -210,7 +203,7 @@ async def demineur_moyen(request:Request):
             {
                 'request':request,
                 'difficulty':"moyen",
-                'inscrit': f"Vous etes inscrit comme {username}"
+                'inscrit': f"Vous êtes inscrit comme {username}"
             }
     )
     response.set_cookie(key="difficulty", value="moyen")
@@ -226,7 +219,7 @@ async def demineur_difficile(request:Request):
             {
                 'request':request,
                 'difficulty':"difficile",
-                'inscrit': "Vous n'etes pas inscrit"
+                'inscrit': "Vous n'êtes pas inscrit"
             }
         )
         response.set_cookie(key="difficulty", value="difficile")
@@ -236,7 +229,7 @@ async def demineur_difficile(request:Request):
             {
                 'request':request,
                 'difficulty':"difficile",
-                'inscrit': f"Vous etes inscrit comme {username}"
+                'inscrit': f"Vous êtes inscrit comme {username}"
             }
     )
     response.set_cookie(key="difficulty", value="difficile")
