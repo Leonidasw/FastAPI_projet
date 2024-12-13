@@ -157,7 +157,7 @@ async def create_board(request:Request):
         {"request": request})      
 
 
-from init_champ import init_plateau_mine, liste_voisins
+from init_champ import init_compte, init_plateau_mine, liste_voisins
 
 @app.get("/demineur/facile")
 async def demineur_facile(request:Request):
@@ -257,19 +257,22 @@ class Matrice(BaseModel):
 async def data(matrice:Matrice,request:Request):
     username=request.cookies.get("username")
     champ=[]
+    index=0
     for i in range(matrice.taille):
         ligne=[]
         for k in range(matrice.taille):
-            if matrice.matrice[i+k]=='cell':
+            if matrice.matrice[index]=='cell':
                 ligne.append(0)
             else:
                 ligne.append(9)
+            index+=1
         champ.append(ligne)
-    #champ=str(champ)
+    positions_mine = [(row, col) for row, line in enumerate(champ) for col, value in enumerate(line) if value == 9] #Cherche la position des mines (x,y)
+    plateau=init_compte(champ,positions_mine)
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
-        cur.execute(f"INSERT INTO Champ(user_id,difficulte,champ) VALUES({id_user},'{matrice.taille}*{matrice.taille}','{champ}')").fetchone()
+        cur.execute(f"INSERT INTO Champ(user_id,difficulte,champ) VALUES({id_user},'{matrice.taille}*{matrice.taille}','{plateau}')").fetchone()
 
 class get_mine(BaseModel):
     id_champ: int
@@ -279,7 +282,6 @@ async def get_mine(matrice: get_mine):
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         champ=cur.execute(f"SELECT champ FROM Champ WHERE id_champ=='{matrice.id_champ}'").fetchone()[0]
-    print(champ)
     return JSONResponse(content=champ)
 
 @app.post("/custom_create/done")

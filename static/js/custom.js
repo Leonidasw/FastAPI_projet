@@ -78,8 +78,5 @@ function sauvegarde(){
       },
       body: JSON.stringify({ matrice: Matrice, taille: size}),
     })
-    //window.location.replace('/custom_create/play')
-    .then(response => response.json())
-    .then(data => {console.log(data)});
 }
 
