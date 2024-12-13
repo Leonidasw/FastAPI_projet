@@ -61,3 +61,25 @@ function demineur(size) {
         nb_mine_affichage.innerHTML=`Nombre de mine: ${affichage}`
     }
 }
+
+function sauvegarde(){
+    const size = document.getElementById("range_t").value
+    const container = document.getElementById('game-container');
+    const cells = container.querySelectorAll('.cell');
+    const Matrice = Array.from(cells).map(cell => {
+        return cell.classList.contains('mine') ? 'cell mine' : 'cell';
+    });
+    console.log("Envoi de la Matrice");  // Affiche le score avant envoi
+    const url = 'http://127.0.0.1:8000/custom_create/data'
+    fetch(url,{
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ matrice: Matrice, taille: size}),
+    })
+    //window.location.replace('/custom_create/play')
+    .then(response => response.json())
+    .then(data => {console.log(data)});
+}
+

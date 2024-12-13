@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS Score (
 CREATE TABLE IF NOT EXISTS Champ (
     id_champ INTEGER PRIMARY KEY AUTOINCREMENT,  -- Clé primaire auto-incrémentée
     user_id INTEGER,                             -- Clé étrangère référencée depuis la table Joueur
-    difficulte TEXT,                             -- Difficulté
+    difficulte TEXT,                             -- Taille du champ de mine
+    champ TEXT,
     FOREIGN KEY (user_id) REFERENCES Joueur (id_user) -- Référence à la table Joueur
 );
 

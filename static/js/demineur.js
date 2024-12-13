@@ -202,8 +202,6 @@ async function send_score(score){
     },
     body: JSON.stringify({ score: score }),
   })
-  .then(response => response.json())
-  .then(data => {console.log(data)});
 }
 
 

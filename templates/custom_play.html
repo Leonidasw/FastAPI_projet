@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/custom_demineur.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>Jouer au champ de mine custom d'un Amis!</p>
+    <p>Voici l'id du champ de mine que vous avez crée! (Le dernier) ID: {{id_champ}}</p>
+    <form onsubmit="get_mine()">
+        <input type="text" id="id_champ" name="id_champ" required></input>
+        <button type="submit">Play!</button>
+    </form>
+    <div id="game-container"></div>
+    <script src="../static/js/custom_play.js"></script>
+</body>
+</html>

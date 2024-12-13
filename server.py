@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 import sqlite3
 import os
 
-dbpath = os.path.join(os.path.dirname(__file__), "db", "database.db")
+dbpath = os.path.join(os.path.dirname(__file__), "db", "database2.db")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -41,14 +41,6 @@ templates = Jinja2Templates(directory="templates/")
 app = FastAPI(lifespan=lifespan) # Création de l application
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-"""def require_login():
-    # Replace with real authentication logic
-    authenticated = False  # Simulating that the user is not authenticated
-    if not authenticated:
-        return RedirectResponse(url="/login")
-    return True"""
 
 @app.get("/")
 async def home():
@@ -255,8 +247,62 @@ async def score(score: Score,request:Request):
         cur = connection.cursor()
         id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
         cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,time_jeu,custom) VALUES({id_user},'{difficulty}','{score.score}',False)").fetchone()
-    return JSONResponse(content=score.score)  # Renvoie le score reçu
-    
+    print("SCORE ENVOYER DANS LA BDD")
+
+class Matrice(BaseModel):
+    matrice: list[str]
+    taille: int
+
+@app.post("/custom_create/data",response_class=HTMLResponse)
+async def data(matrice:Matrice,request:Request):
+    username=request.cookies.get("username")
+    champ=[]
+    for i in range(matrice.taille):
+        ligne=[]
+        for k in range(matrice.taille):
+            if matrice.matrice[i+k]=='cell':
+                ligne.append(0)
+            else:
+                ligne.append(9)
+        champ.append(ligne)
+    #champ=str(champ)
+    with sqlite3.connect(dbpath) as connection:
+        cur = connection.cursor()
+        id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
+        cur.execute(f"INSERT INTO Champ(user_id,difficulte,champ) VALUES({id_user},'{matrice.taille}*{matrice.taille}','{champ}')").fetchone()
+
+class get_mine(BaseModel):
+    id_champ: int
+
+@app.post("/custom_create/get_mine")
+async def get_mine(matrice: get_mine):
+    with sqlite3.connect(dbpath) as connection:
+        cur = connection.cursor()
+        champ=cur.execute(f"SELECT champ FROM Champ WHERE id_champ=='{matrice.id_champ}'").fetchone()[0]
+    print(champ)
+    return JSONResponse(content=champ)
+
+@app.post("/custom_create/done")
+async def done():
+    return RedirectResponse(url="/custom_create/play",status_code=303)
+
+@app.get("/custom_create/play")
+def play(request:Request):
+    with sqlite3.connect(dbpath) as connection:
+        cur = connection.cursor()
+        id_champ = cur.execute("SELECT id_champ FROM Champ ORDER BY id_champ DESC LIMIT 1").fetchone()
+    if id_champ is None:
+        id_champ = ""
+    else:
+        id_champ=id_champ[0]
+    return templates.TemplateResponse(
+            'custom_play.html',
+            {
+                'request':request,
+                "id_champ": id_champ,
+            }
+    )
+
 @app.get("/demineur/get_mine")
 async def get_mine(request:Request):
     difficulty = request.cookies.get("difficulty")
