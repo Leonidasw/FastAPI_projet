@@ -340,14 +340,14 @@ async def get_mine(request:Request):
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
         #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
     elif difficulty=="moyen":
-        nb_mines = 10*10*0.2
+        nb_mines = 10*10*0.25
         taille = 10
         case_joueur=(1,1)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
         #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
     elif difficulty=="difficile":
-        nb_mines = 15*15*0.2
+        nb_mines = 15*15*0.30
         taille = 15
         case_joueur=(1,1)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
