@@ -158,17 +158,6 @@ async def create_board(request:Request):
     return templates.TemplateResponse(
         "custom_create.html", 
         {"request": request})  
-@app.get('/custom_create_william')
-async def create_board(request:Request):
-    username = request.cookies.get("username")
-    if username is None:
-        return RedirectResponse(url="/login")
-    return templates.TemplateResponse(
-        "custom_create_william.html", 
-        {"request": request})      
-
-
-from init_champ import init_compte, init_plateau_mine, liste_voisins
 
 @app.get("/demineur/facile")
 async def demineur_facile(request:Request):
@@ -260,7 +249,20 @@ async def score(request:Request):
         cur = connection.cursor()
         id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
         cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,score_centiseconds,custom) VALUES({id_user},'{difficulty}','{score_centiseconds}',False)").fetchone()
-    print("SCORE ENVOYER DANS LA BDD")
+
+@app.post("/profile_page/get_score")
+async def get_score(request:Request):
+    username=request.cookies.get("username")
+    with sqlite3.connect(dbpath) as connection:
+        cur = connection.cursor()
+        score_facile = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}' and Score.difficulte_jeu=='facile' ORDER BY Score.date_jeu ASC").fetchall()
+        score_moyen = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}' and Score.difficulte_jeu=='moyen' ORDER BY Score.date_jeu ASC").fetchall()
+        score_difficile = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}' and Score.difficulte_jeu=='difficile' ORDER BY Score.date_jeu ASC").fetchall()
+    facile = [score[0]//100 for score in score_facile]
+    moyen = [score[0]//100 for score in score_moyen]
+    difficile = [score[0]//100 for score in score_difficile]
+    return JSONResponse(content=[facile,moyen,difficile])
+
 
 class Matrice(BaseModel):
     matrice: list[str]
@@ -318,27 +320,33 @@ def play(request:Request):
             }
     )
 
+from init_champ import init_compte, init_plateau_mine, liste_voisins
+#from creation_plateau_demineur import plateau_jeu_possible
+
 @app.get("/demineur/get_mine")
 async def get_mine(request:Request):
     difficulty = request.cookies.get("difficulty")
     if difficulty=="facile":
-        nb_mines = 5
+        nb_mines = 5*5*0.2
         taille = 5
         case_joueur=(0,0)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
-        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
+        #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
     elif difficulty=="moyen":
-        nb_mines = 15
+        nb_mines = 10*10*0.2
         taille = 10
         case_joueur=(1,1)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
+        #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
     elif difficulty=="difficile":
-        nb_mines = 30
+        nb_mines = 15*15*0.2
         taille = 15
         case_joueur=(1,1)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+        #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
     else:
         return "Erreur"
     return plateau_jeu

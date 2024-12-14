@@ -1,5 +1,12 @@
 window.onload = function() {
     // Récupère l'URL actuelle
+    const ham_button = document.querySelector('.hamburger');
+    const get = document.querySelector(".navbar");
+    ham_button.addEventListener('click', function (){
+      ham_button.classList.toggle('is-active');
+      get.classList.toggle('is-active');
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
 
     // Récupère la valeur de "id_champ"
@@ -9,6 +16,7 @@ window.onload = function() {
         get_mine(idChamp)
     }
 }
+
 
 
 function get_mine(idChamp){

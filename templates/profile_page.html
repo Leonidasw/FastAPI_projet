@@ -3,6 +3,11 @@
     <head>
         <title>Data</title>
         <link rel="stylesheet" href="/static/css/style_profile.css">
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script src="https://code.highcharts.com/modules/series-label.js"></script>
+        <script src="https://code.highcharts.com/modules/exporting.js"></script>
+        <script src="https://code.highcharts.com/modules/export-data.js"></script>
+        <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     </head>
     <body>
         <h2>Bonjour, {{ username }}</h2>
@@ -27,6 +32,13 @@
         </button>
         <script src="../static/js/profile.js"></script>
         <br><br>
+        
+        <figure class="highcharts-figure">
+            <div id="container"></div>
+            <script src="../static/js/graphe.js"></script>
+        </figure>
+
+
         <a href="/logout">Se déconnecter</a>
     </body>
 </html>
