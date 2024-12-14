@@ -46,14 +46,22 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def home():
     return RedirectResponse(url="/login")
 
-def verif_mdp(username,mdp):
+def verif_mdp(username:str,mdp:str)->bool:
+    """
+    Hyp: Vérifie que le coupe username et mot de passe est correcte. Return True si le couple est bon sinon false
+    """
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         db_mdp = cur.execute(f"SELECT user_mdp FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
+    if db_mdp is None:
+        return False
     return mdp==db_mdp[0]
 
 @app.post("/soumettre_login", response_class=HTMLResponse)
 async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
+    """
+    Hyp: Récupère les données fourni par l'utilisateur, et le connecte si le couple username et mdp est correct.
+    """
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         data = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'").fetchone()
@@ -70,13 +78,20 @@ async def submit_form(request: Request, username: str = Form(...), password: str
 
 @app.get("/logout")
 async def logout(response:Response):
+    """
+    Hyp: Pour se déconnecter du site (cela supprimme les cookies)
+    """
     response = RedirectResponse(url="/login")
     response.delete_cookie("username")
     response.delete_cookie("password")
+    response.delete_cookie("difficulty")
     return response
 
 @app.get("/login")
 async def login(request:Request):
+    """
+    Hyp: Pour aller sur le login.html quand on va sur /html, vérifie s'il n'est pas déjà login, si oui il le redirige dans profile_page
+    """
     username = request.cookies.get("username")
     if username is None:
         return templates.TemplateResponse('login.html',{'request': request,'title':'Login page',})
@@ -85,6 +100,9 @@ async def login(request:Request):
 
 @app.get("/inscription")
 async def inscription(request:Request):
+    """
+    Hyp: Pour aller sur le inscription.html quand on va sur /inscription, vérifie s'il n'est pas déjà login, si oui il le redirige dans profile_page
+    """
     username = request.cookies.get("username")
     if username is not None:
         return RedirectResponse(url="/profile_page")
@@ -92,9 +110,17 @@ async def inscription(request:Request):
 
 @app.get("/profile_page")
 async def profile_page(request:Request):
+    """
+    Hyp: Pour aller sur le profile_page.html quand on va sur /profile_page, vérifie s'il est login, si il n'est pas connecté le redirige vers /login
+    """
     username = request.cookies.get("username")
     if username is None:
         return RedirectResponse(url="/login")
+    mdp= request.cookies.get("password")
+    if verif_mdp(username,mdp) is False: ## Vérifie si quelqu'un à modifier le cookie username pour usurper l'identité de quelqu'un d'autre.
+        return templates.TemplateResponse(
+                    "error.html", 
+                    {"request": request, "message":"ERREUR GRAVE: Le nom d'utilisateur et le mot de passe ne correspond pas à la base de données!"})     
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
     jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
@@ -116,6 +142,9 @@ async def profile_page(request:Request):
 
 @app.post("/soumettre_register", response_class=HTMLResponse)
 async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
+    """
+    Hyp: Récupère les données fourni par l'utilisateur, et crée le compte et l'insère dans la bdd si l'utilisateur n'est pas déjà utilisé
+    """
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         test_user = cur.execute(f"SELECT * FROM Joueur WHERE user_pseudo=='{username}'   ").fetchone()
@@ -129,12 +158,17 @@ async def submit_form(request: Request, username: str = Form(...), password: str
         return templates.TemplateResponse('inscription.html',{'request': request,'Valide':"Le nom d'utilisateur est déjà utilisé"})
     
 @app.get("/demineur")
-async def demineur(request:Request):
+async def demineur():
+    """
+    Hyp: Redirige l'utilisateur vers /demineur/facile
+    """
     return RedirectResponse(url="/demineur/facile",status_code=303)
-    #return templates.TemplateResponse('demineur.html',{'request': request,'title':"Démineur", 'inscrit':''})
 
 @app.get('/leaderboard')
 async def leaderboard(request:Request):
+    """
+    Hyp: Récupère les données des utilisateurs dans la bdd et l'affiche dans plusieurs tableaux
+    """
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         data_facile = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="facile" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC').fetchall()
@@ -158,15 +192,26 @@ async def leaderboard(request:Request):
 
 @app.get('/custom_create')
 async def create_board(request:Request):
+    """
+    Hyp: Pour aller sur le custom_create.html quand on va sur /custom_create, vérifie s'il est login, si il n'est pas connecté le redirige vers /login
+    """
     username = request.cookies.get("username")
-    if username is None:
+    if username is None:  # Vérifie si il est connecté
         return RedirectResponse(url="/login")
+    mdp= request.cookies.get("password")
+    if verif_mdp(username,mdp) is False: ## Vérifie si quelqu'un à modifier le cookie username pour usurper l'identité de quelqu'un d'autre.
+        return templates.TemplateResponse(
+                    "error.html", 
+                    {"request": request, "message":"ERREUR GRAVE: Le nom d'utilisateur et le mot de passe ne correspond pas à la base de données!"})
     return templates.TemplateResponse(
         "custom_create.html", 
         {"request": request})  
 
 @app.get("/demineur/facile")
 async def demineur_facile(request:Request):
+    """
+    Hyp: Affiche le jeu en mode facile.
+    """
     username = request.cookies.get("username")
     if username is None:
         response =templates.TemplateResponse(
@@ -179,6 +224,11 @@ async def demineur_facile(request:Request):
         )
         response.set_cookie(key="difficulty", value="facile")
         return response
+    mdp= request.cookies.get("password")
+    if verif_mdp(username,mdp) is False: ## Vérifie si quelqu'un à modifier le cookie username pour usurper l'identité de quelqu'un d'autre.
+        return templates.TemplateResponse(
+                    "error.html", 
+                    {"request": request, "message":"ERREUR GRAVE: Le nom d'utilisateur et le mot de passe ne correspond pas à la base de données!"})
     response =templates.TemplateResponse(
             'demineur.html',
             {
@@ -192,6 +242,9 @@ async def demineur_facile(request:Request):
 
 @app.get("/demineur/moyen")
 async def demineur_moyen(request:Request):
+    """
+    Hyp: Affiche le jeu en mode moyen.
+    """
     username = request.cookies.get("username")
     if username is None:
         response =templates.TemplateResponse(
@@ -204,6 +257,11 @@ async def demineur_moyen(request:Request):
         )
         response.set_cookie(key="difficulty", value="moyen")
         return response
+    mdp= request.cookies.get("password")
+    if verif_mdp(username,mdp) is False: ## Vérifie si quelqu'un à modifier le cookie username pour usurper l'identité de quelqu'un d'autre.
+        return templates.TemplateResponse(
+                    "error.html", 
+                    {"request": request, "message":"ERREUR GRAVE: Le nom d'utilisateur et le mot de passe ne correspond pas à la base de données!"})
     response =templates.TemplateResponse(
             'demineur.html',
             {
@@ -218,6 +276,9 @@ async def demineur_moyen(request:Request):
 
 @app.get("/demineur/difficile")
 async def demineur_difficile(request:Request):
+    """
+    Hyp: Affiche le jeu en mode difficile.
+    """
     username = request.cookies.get("username")
     if username is None:
         response =templates.TemplateResponse(
@@ -230,6 +291,11 @@ async def demineur_difficile(request:Request):
         )
         response.set_cookie(key="difficulty", value="difficile")
         return response
+    mdp= request.cookies.get("password")
+    if verif_mdp(username,mdp) is False: ## Vérifie si quelqu'un à modifier le cookie username pour usurper l'identité de quelqu'un d'autre.
+        return templates.TemplateResponse(
+                    "error.html", 
+                    {"request": request, "message":"ERREUR GRAVE: Le nom d'utilisateur et le mot de passe ne correspond pas à la base de données!"})
     response =templates.TemplateResponse(
             'demineur.html',
             {
@@ -242,11 +308,14 @@ async def demineur_difficile(request:Request):
     return response
 
 from pydantic import BaseModel
-class Score(BaseModel):
+class Score(BaseModel): #Permet de récupéré les données de js.
     score: int
 
 @app.post("/demineur/score")
 async def score(request:Request):
+    """
+    Hyp: Après une demande du code java script, enrengistre le score fourni par java script dans la bdd 
+    """
     username=request.cookies.get("username")
     difficulty=request.cookies.get("difficulty")
     data = await request.json()
@@ -258,6 +327,9 @@ async def score(request:Request):
 
 @app.post("/profile_page/get_score")
 async def get_score(request:Request):
+    """
+    Hyp: Après une demande du code java script, récupère le score de l'utilisateur et le donne à java script
+    """
     username=request.cookies.get("username")
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
@@ -276,6 +348,9 @@ class Matrice(BaseModel):
 
 @app.post("/custom_create/data",response_class=HTMLResponse)
 async def data(matrice:Matrice,request:Request):
+    """
+    Hyp: Après une demande du code java script, enrengistre le champ (fourni par js) crée par l'utilisateur dans la bdd
+    """
     username=request.cookies.get("username")
     champ=[]
     index=0
@@ -300,6 +375,9 @@ class get_mine(BaseModel):
 
 @app.post("/custom_create/get_mine")
 async def get_mine(matrice: get_mine):
+    """
+    Hyp: Après une demande de js, envoie le champ de mine au code java script avec l'id champ aussi fourni par java script
+    """
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         champ=cur.execute(f"SELECT champ FROM Champ WHERE id_champ=='{matrice.id_champ}'").fetchone()[0]
@@ -307,13 +385,35 @@ async def get_mine(matrice: get_mine):
 
 @app.post("/custom_create/done")
 async def done():
+    """
+    Hyp: Permet simplement de rediriger l'utilisateur vers /custom_create/play lors qu'il a fini de crée son champ de mine
+    """
     return RedirectResponse(url="/custom_create/play",status_code=303)
 
 @app.get("/custom_create/play")
 def play(request:Request):
+    """
+    Hyp: Permet de jouer au champ de mine custom crée par les utilisateurs avec un simple id_champ (fourni à la création du champ)
+    """
+    username=request.cookies.get("username")
+    if username is None:
+        id_champ=""
+        return templates.TemplateResponse(
+            'custom_play.html',
+            {
+                'request':request,
+                "id_champ": id_champ,
+            }
+        )
+    mdp= request.cookies.get("password")
+    if verif_mdp(username,mdp) is False: ## Vérifie si quelqu'un à modifier le cookie username pour usurper l'identité de quelqu'un d'autre.
+        return templates.TemplateResponse(
+                    "error.html", 
+                    {"request": request, "message":"ERREUR GRAVE: Le nom d'utilisateur et le mot de passe ne correspond pas à la base de données!"})
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
-        id_champ = cur.execute("SELECT id_champ FROM Champ ORDER BY id_champ DESC LIMIT 1").fetchone()
+        id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
+        id_champ = cur.execute(f"SELECT id_champ FROM Champ WHERE user_id=={id_user} ORDER BY id_champ DESC LIMIT 1").fetchone()
     if id_champ is None:
         id_champ = ""
     else:
@@ -327,32 +427,35 @@ def play(request:Request):
     )
 
 from init_champ import init_compte, init_plateau_mine, liste_voisins
-#from creation_plateau_demineur import plateau_jeu_possible
+from creation_plateau_demineur import plateau_jeu_possible
 
 @app.get("/demineur/get_mine")
-async def get_mine(request:Request):
+async def get_mine(request:Request)->str:
+    """
+    Hyp: Fourni une matrice (champ de mine) à java script pour qu'il puisse l'affiche à l'utilisateur
+    """
     difficulty = request.cookies.get("difficulty")
     if difficulty=="facile":
         nb_mines = 5*5*0.2
         taille = 5
         case_joueur=(0,0)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
-        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
-        #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
+        #plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
+        plateau_jeu = str(plateau_jeu_possible(taille,nb_mines,[0,0]))
     elif difficulty=="moyen":
         nb_mines = 10*10*0.25
         taille = 10
         case_joueur=(1,1)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
-        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
-        #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
+        #plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
+        plateau_jeu = str(plateau_jeu_possible(taille,nb_mines,[0,0]))
     elif difficulty=="difficile":
         nb_mines = 15*15*0.30
         taille = 15
         case_joueur=(1,1)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
-        plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
-        #plateau_jeu = str(plateau_jeu_possible(nb_mines,taille,[0,0]))
+        #plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U))
+        plateau_jeu = str(plateau_jeu_possible(taille,nb_mines,[0,0]))
     else:
         return "Erreur"
     return plateau_jeu
