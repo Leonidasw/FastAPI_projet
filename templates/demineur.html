@@ -22,14 +22,18 @@
   </div>
   <h1>Jeu Démineur</h1>
   <h2> {{ inscrit }}</h2>
-  <a href="/demineur/facile">Facile</a>
-  <a href="/demineur/moyen">Moyen</a>
-  <a href="/demineur/difficile">Difficile</a>
+    <!--surround the select box with a "custom-select" DIV element. Remember to set the width:-->
+    <div class="custom-select" style="width:200px;">
+      <select id="selector">
+        <option value="0">Options</option>
+        <option value="facile">Facile</option>
+        <option value="moyen">Moyen</option>
+        <option value="difficile">Difficile</option>
+      </select>
+    </div>
     <p id="timer">0:00.00</p>
     <div id="game-container"></div> <!--Initiation du jeu-->
   <script src="../static/js/demineur.js"></script>
-  <a href="/logout">Logout</a>
-
 
 </body>
 </html>

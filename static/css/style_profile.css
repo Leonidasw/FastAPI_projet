@@ -1,102 +1,206 @@
 * {
-    text-align: center;
-    justify-content: center;
+  text-align: center;
+  justify-content: center;
 }
 
 body {
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f4f4f4;
-    font-family: 'Oswald', sans-serif;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f4f4f4;
+  font-family: 'Oswald', sans-serif;
 }
 
+#intro {
+  opacity: 0;
+  animation: fadeIn 2s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+
+
+
 #demineurButton {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #e0e0e0;
-    border: 2px solid #888;
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    width: 9em;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  border: 2px solid #888;
+  border-radius: 8px;
+  margin: 1em;
+  padding: 9px;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  width: 9em;
+  transition: 800ms;
+}
+
+#demineurButton:hover {
+  transition: 800ms;
+  box-shadow: 9px 9px 13px rgba(0, 0, 0, 0.2);
 }
 #leaderboardButton {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #e0e0e0;
-    border: 2px solid #888;
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  margin: 1em;
+  border: 2px solid #888;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  transition: 800ms;
+}
+
+#leaderboardButton:hover {
+  transition: 800ms;
+  box-shadow: 9px 9px 13px rgba(0, 0, 0, 0.2);
 }
 #customButton {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #e0e0e0;
-    border: 2px solid #888;
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  margin: 1em;
+  border: 2px solid #888;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  transition: 800ms;
+}
+
+#customButton:hover {
+  transition: 800ms;
+  box-shadow: 9px 9px 13px rgba(0, 0, 0, 0.2);
 }
 
 #demineurCanvas {
-    border: 1px solid #000;
+  border: 1px solid #000;
+}
+
+
+.logout-button {
+  position: relative;
+  display: inline-block;
+  background-color: #ff4d4d;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.logout-button:hover {
+  background-color: #ff1a1a;
+}
+
+/* Arrow styles */
+.arrow {
+  position: absolute;
+  top: 100%; /* Start just below the button */
+  left:50%;
+  opacity: 0;
+  font-size: x-large;
+  color: rgb(0, 0, 0);
+  transition: opacity 0.3s, transform 0.5s ease-in-out;
+} .logout-button {
+  position: relative;
+  display: inline-block;
+  background-color: #ff4d4d;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  transition: 500ms;
+}
+
+.logout-button:hover {
+  background-color: #ff1a1a;
+  transition: 500ms;
+}
+
+/* Arrow styles */
+.arrow {
+  position: absolute;
+  top: 100%; /* Start just below the button */
+  left: 50%; /* Start from the far right of the button */
+  opacity: 0;
+  font-size: x-large;
+  color: rgb(0, 0, 0);
+  transition: opacity 0.3s, transform 0.5s ease-in-out;
+}
+
+.logout-button:hover .arrow {
+  opacity: 1;
+  transform: translateX(-50%); /* Move below the center of the button */
+  left: 50%; /* Target middle of the button */
 }
 
 
 .buttonText {
-    font-size: 16px;
-    margin-top: 5px;
-    font-weight: bold;
+  font-size: 16px;
+  margin-top: 5px;
+  font-weight: bold;
 }
 
 .highcharts-figure,
 .highcharts-data-table table {
-  min-width: 360px;
-  max-width: 800px;
-  margin: 1em auto;
+min-width: 360px;
+max-width: 800px;
+margin: 1em auto;
 }
 
 .highcharts-data-table table {
-  font-family: Verdana, sans-serif;
-  border-collapse: collapse;
-  border: 1px solid #ebebeb;
-  margin: 10px auto;
-  text-align: center;
-  width: 100%;
-  max-width: 500px;
+font-family: Verdana, sans-serif;
+border-collapse: collapse;
+border: 1px solid #ebebeb;
+margin: 10px auto;
+text-align: center;
+width: 100%;
+max-width: 500px;
 }
 
 .highcharts-data-table caption {
-  padding: 1em 0;
-  font-size: 1.2em;
-  color: #555;
+padding: 1em 0;
+font-size: 1.2em;
+color: #555;
 }
 
 .highcharts-data-table th {
-  font-weight: 600;
-  padding: 0.5em;
+font-weight: 600;
+padding: 0.5em;
 }
 
 .highcharts-data-table td,
 .highcharts-data-table th,
 .highcharts-data-table caption {
-  padding: 0.5em;
+padding: 0.5em;
 }
 
 .highcharts-data-table thead tr,
 .highcharts-data-table tr:nth-child(even) {
-  background: #f4f4f4;
+background: #f4f4f4;
 }
 
 .highcharts-data-table tr:hover {
-  background: #f4f4f4;
+background: #f4f4f4;
 }
