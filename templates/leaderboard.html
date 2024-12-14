@@ -3,16 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/style_demineur.css">
     <title>{{ title }}</title>
 </head>
 <body>
+    <script src="../static/js/leaderboard.js"></script>
+    
+    <div id="sup">
+        <button class="hamburger">
+          <div class="bar"></div>
+        </button>
+        <div class="navbar">
+          <ul>
+            <li><a href="../profile_page">Profile</a></li>
+            <li><a href="../leaderboard">Leaderboard</a></li>
+            <li><a href="../custom_create">Custom</a></li>
+          </ul>
+        </div>
+      </div>
     <h1>{{ title }}</h1>
     <table border="1">
         <thead>
             <tr>
                 <th>Rank</th>
                 <th>Player</th>
-                <th>Time (seconds)</th>
+                <th>Time</th>
                 <th>Date</th>
                 <th>Mode</th>
             </tr>
@@ -29,6 +44,7 @@
             {% endfor %}
         </tbody>
     </table>
+    <br>
     <table border="1">
         <thead>
             <tr>

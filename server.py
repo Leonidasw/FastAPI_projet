@@ -98,10 +98,21 @@ async def profile_page(request:Request):
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
     jeux=cur.execute(f"SELECT COUNT(*) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
-    temps = cur.execute(f"SELECT MIN(Score.time_jeu) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
-    return templates.TemplateResponse(
+    temps = cur.execute(f"SELECT MIN(Score.score_centiseconds) FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}';").fetchone()[0]
+    if temps is None:
+        return templates.TemplateResponse(
                 "profile_page.html", 
-                {"request": request, "username": username,"games":jeux,"time":temps})        
+                {"request": request, "username": username,"games":jeux,"time":'None'})
+    else:
+        minutes = int(temps) // 6000
+        seconds = (int(temps) % 6000) // 100
+        centis = int(temps) % 100
+
+        # Format each component with leading zero if necessary
+
+        return templates.TemplateResponse(
+                    "profile_page.html", 
+                    {"request": request, "username": username,"games":jeux,"time":f'{minutes} minutes, {seconds} secondes et {centis} centisecondes'})       
 
 @app.post("/soumettre_register", response_class=HTMLResponse)
 async def submit_form(request: Request, username: str = Form(...), password: str = Form(...)):
@@ -126,7 +137,7 @@ async def demineur(request:Request):
 async def leaderboard(request:Request):
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
-        data = cur.execute("SELECT Joueur.user_pseudo,Score.time_jeu,Score.date_jeu,Score.difficulte_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.time_jeu ASC").fetchall()
+        data = cur.execute("SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu,Score.difficulte_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.score_centiseconds ASC").fetchall()
         wins = cur.execute("SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()
     return templates.TemplateResponse(
         'leaderboard.html',
@@ -237,16 +248,18 @@ async def demineur_difficile(request:Request):
 
 from pydantic import BaseModel
 class Score(BaseModel):
-    score: str
+    score: int
 
 @app.post("/demineur/score")
-async def score(score: Score,request:Request):
+async def score(request:Request):
     username=request.cookies.get("username")
     difficulty=request.cookies.get("difficulty")
+    data = await request.json()
+    score_centiseconds = data["score"]
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
-        cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,time_jeu,custom) VALUES({id_user},'{difficulty}','{score.score}',False)").fetchone()
+        cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,score_centiseconds,custom) VALUES({id_user},'{difficulty}','{score_centiseconds}',False)").fetchone()
     print("SCORE ENVOYER DANS LA BDD")
 
 class Matrice(BaseModel):

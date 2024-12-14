@@ -1,3 +1,13 @@
+window.onload = function() {
+    const ham_button = document.querySelector('.hamburger');
+    const get = document.querySelector(".navbar");
+  
+    ham_button.addEventListener('click', function (){
+      ham_button.classList.toggle('is-active');
+      get.classList.toggle('is-active');
+    });
+  };
+
 const slider = document.getElementById("range_t");
 const output = document.getElementById("demo");
 demineur("5")
