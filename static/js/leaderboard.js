@@ -17,16 +17,22 @@ window.onload = function() {
       get.classList.toggle('is-active');
     });
     // Get all rows in the first table except the header row
-    const rows = document.querySelectorAll('table:first-of-type tbody tr');
-    
-    rows.forEach((row) => {
-        // Get the Time column cell (3rd column; index 2)
-        const timeCell = row.cells[2]; 
-        if (timeCell) {
-            const centiseconds = parseInt(timeCell.textContent.trim(), 10); // Parse text content as integer
-            if (!isNaN(centiseconds)) { // Check if parsed value is valid
-                timeCell.textContent = formatScore(centiseconds); // Update with formatted time
+    const tables = document.querySelectorAll('table');
+    const tablesToFormat = Array.from(tables).slice(0, -1); // Select all tables except the last one
+        
+    tablesToFormat.forEach((table) => {
+            // Get all rows in the current table except the header row
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach((row) => {
+            // Get the Time column cell (3rd column; index 2)
+            const timeCell = row.cells[2]; 
+            if (timeCell) {
+                const centiseconds = parseInt(timeCell.textContent.trim(), 10); // Parse text content as integer
+                if (!isNaN(centiseconds)) { // Check if parsed value is valid
+                    timeCell.textContent = formatScore(centiseconds); // Update with formatted time
+                }
             }
-        }
+        });
     });
 };

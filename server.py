@@ -137,15 +137,21 @@ async def demineur(request:Request):
 async def leaderboard(request:Request):
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
-        data = cur.execute("SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu,Score.difficulte_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user ORDER BY Score.score_centiseconds ASC").fetchall()
-        wins = cur.execute("SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()
+        data_facile = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="facile" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC').fetchall()
+        data_medium = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="moyen" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC').fetchall()
+        data_difficile = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="difficile" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC').fetchall()
+        wins = cur.execute("SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()#WHERE Score.custom == 1
+        custom_rank = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu,Champ.id_champ,Champ.difficulte FROM Score JOIN Joueur ON Joueur.id_user=Score.id_user JOIN Champ ON Joueur.id_user = Champ.user_id WHERE Score.custom != "NULL" AND Score.custom=Champ.id_champ ORDER BY Score.score_centiseconds ASC').fetchall()
     return templates.TemplateResponse(
         'leaderboard.html',
         {
             'request': request,
-            'title': "Leaderboard",
-            'score': data,
+            'title': "Classements",
+            'score_facile': data_facile,
+            'score_medium': data_medium,
+            'score_difficile': data_difficile,
             'wins':wins,
+            'custom':custom_rank,
             'enumerate': enumerate  # Add `enumerate` to the template context
         }
     )
@@ -248,7 +254,7 @@ async def score(request:Request):
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
-        cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,score_centiseconds,custom) VALUES({id_user},'{difficulty}','{score_centiseconds}',False)").fetchone()
+        cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,score_centiseconds,custom) VALUES({id_user},'{difficulty}','{score_centiseconds}','NULL')").fetchone()
 
 @app.post("/profile_page/get_score")
 async def get_score(request:Request):

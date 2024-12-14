@@ -22,35 +22,105 @@
         </div>
       </div>
     <h1>{{ title }}</h1>
+    <div class="tables-container">
+        <table border="1">
+            <caption>Facile</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Rang</th>
+                    <th scope="col">Joueur</th>
+                    <th scope="col">Temps</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, entry in enumerate(score_facile, start=1) %}
+                <tr>
+                    <td>{{ index }}</td>
+                    <td>{{ entry[0] }}</td> <!-- user_pseudo -->
+                    <td>{{ entry[1] }}</td> <!-- time_jeu -->
+                    <td>{{ entry[2] }}</td> <!-- date_jeu -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <table border="1">
+            <caption>Moyen</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Rang</th>
+                    <th scope="col">Joueur</th>
+                    <th scope="col">Temps</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, entry in enumerate(score_medium, start=1) %}
+                <tr>
+                    <td>{{ index }}</td>
+                    <td>{{ entry[0] }}</td> <!-- user_pseudo -->
+                    <td>{{ entry[1] }}</td> <!-- time_jeu -->
+                    <td>{{ entry[2] }}</td> <!-- date_jeu -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <table border="1">
+            <caption>Difficile</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Rang</th>
+                    <th scope="col">Joueur</th>
+                    <th scope="col">Temps</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, entry in enumerate(score_difficile, start=1) %}
+                <tr>
+                    <td>{{ index }}</td>
+                    <td>{{ entry[0] }}</td> <!-- user_pseudo -->
+                    <td>{{ entry[1] }}</td> <!-- time_jeu -->
+                    <td>{{ entry[2] }}</td> <!-- date_jeu -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <br><br>
     <table border="1">
+        <caption>Jeux Custom</caption>
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Time</th>
-                <th>Date</th>
-                <th>Mode</th>
+                <th scope="col">Rang</th>
+                <th scope="col">Joueur</th>
+                <th scope="col">Temps</th>
+                <th scope="col">Date</th>
+                <th scope="col">Champ</th>
+                <th scope="col">Difficulté</th>
             </tr>
         </thead>
         <tbody>
-            {% for index, entry in enumerate(score, start=1) %}
+            {% for index, entry in enumerate(custom, start=1) %}
             <tr>
                 <td>{{ index }}</td>
                 <td>{{ entry[0] }}</td> <!-- user_pseudo -->
-                <td>{{ entry[1] }}</td> <!-- time_jeu -->
+                <td>{{ entry[1] }}</td> <!-- score-->
                 <td>{{ entry[2] }}</td> <!-- date_jeu -->
-                <td>{{ entry[3] }}</td> <!-- difficulte_jeu -->
-            </tr>
+                <td>{{ entry[3] }}</td> <!-- id_champ -->
+                <td>{{ entry[4] }}</td> <!-- champ_difficulte -->
+            </tr> <!--SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu,Champ.id_champ,Champ.difficulte-->
             {% endfor %}
         </tbody>
     </table>
-    <br>
+    <br><br>
     <table border="1">
+        <caption>Jeux gagnés</caption>
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Wins</th>
+                <th scope="col">Rang</th>
+                <th scope="col">Joueur</th>
+                <th scope="col">Jeux</th>
             </tr>
         </thead>
         <tbody>
