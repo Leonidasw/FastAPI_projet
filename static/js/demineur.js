@@ -1,4 +1,12 @@
+window.onload = function() {
+  const ham_button = document.querySelector('.hamburger');
+  const get = document.querySelector(".navbar");
 
+  ham_button.addEventListener('click', function (){
+    ham_button.classList.toggle('is-active');
+    get.classList.toggle('is-active');
+  });
+};
 async function get_mine() {
   const url = 'http://127.0.0.1:8000/demineur/get_mine'; // L'URL de ton endpoint
   const response = await fetch(url); // Requête GET simple
