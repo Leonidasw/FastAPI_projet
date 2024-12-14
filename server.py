@@ -171,11 +171,11 @@ async def leaderboard(request:Request):
     """
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
-        data_facile = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="facile" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC').fetchall()
-        data_medium = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="moyen" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC').fetchall()
-        data_difficile = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="difficile" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC').fetchall()
+        data_facile = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="facile" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC LIMIT 5').fetchall()
+        data_medium = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="moyen" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC LIMIT 5').fetchall()
+        data_difficile = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Score.difficulte_jeu=="difficile" AND Score.custom == "NULL" ORDER BY Score.score_centiseconds ASC LIMIT 5').fetchall()
         wins = cur.execute("SELECT Joueur.user_pseudo, COUNT(Score.id_user) AS appearances FROM Score JOIN Joueur ON Score.id_user = Joueur.id_user GROUP BY Joueur.user_pseudo ORDER BY appearances DESC;").fetchall()#WHERE Score.custom == 1
-        custom_rank = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu,Champ.id_champ,Champ.difficulte FROM Score JOIN Joueur ON Joueur.id_user=Score.id_user JOIN Champ ON Joueur.id_user = Champ.user_id WHERE Score.custom != "NULL" AND Score.custom=Champ.id_champ ORDER BY Score.score_centiseconds ASC').fetchall()
+        custom_rank = cur.execute('SELECT Joueur.user_pseudo,Score.score_centiseconds,Score.date_jeu,Champ.id_champ,Champ.difficulte FROM Score JOIN Joueur ON Joueur.id_user=Score.id_user JOIN Champ ON Joueur.id_user = Champ.user_id WHERE Score.custom != "NULL" AND Score.custom=Champ.id_champ ORDER BY Score.score_centiseconds ASC LIMIT 5').fetchall()
     return templates.TemplateResponse(
         'leaderboard.html',
         {

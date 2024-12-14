@@ -64,7 +64,6 @@ for (let row = 0; row < rows; row++) {
 async function revealCell(row, col) {
   if (compteur===false){
     interval = setInterval(update_Timer,10)
-    console.log(interval)
     compteur=true
   }
   if (game===false){
@@ -146,10 +145,27 @@ async function check_win(){
     clearInterval(interval)
     game=false
     temps=document.getElementById("timer")
-    alert("Vous avez gagné ! Félicitations ! Votre temps est de "+temps.textContent);
     send_score(temps.textContent)
+    alert("Vous avez gagné ! Félicitations ! Votre temps est de "+temps.textContent);
   }
 }
+
+async function send_score(scoreStr){
+  //const [minutes, seconds, centiseconds] = scoreStr.split(/[:.]/).map(Number);
+  //const totalCentiseconds = (minutes * 60 * 100) + (seconds * 100) + centiseconds;
+  //console.log(chrono-1)
+  //console.log(totalCentiseconds)
+
+  const url = 'http://127.0.0.1:8000/demineur/score'
+  fetch(url,{
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ score: chrono-1}),
+  })
+}
+
 // Timer
 function update_Timer(){
   const minutes= Math.floor(chrono/100/60);
@@ -199,22 +215,6 @@ function revealNeighborsIfFlagsMatch(row, col) {
       }
     });
   }
-}
-
-async function send_score(scoreStr){
-  const [minutes, seconds, centiseconds] = scoreStr.split(/[:.]/).map(Number);
-  const totalCentiseconds = (minutes * 60 * 100) + (seconds * 100) + centiseconds;
-
-  const url = 'http://127.0.0.1:8000/demineur/score'
-  fetch(url,{
-    method: "post",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ score: totalCentiseconds}),
-  })
-  .then(response => response.json())
-  .then(data => {console.log(data)});
 }
 
 
