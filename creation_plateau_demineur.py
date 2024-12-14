@@ -438,7 +438,7 @@ def plateau_jeu_possible(nb_mines: int, taille: int, case_joueur: list) -> list:
             if nb_mark == nb_mines and nb_covered == 0:
                 jeu_possible = True
                 game = False
-            elif i == (taille**2)*1.1:
+            elif i == (taille**2)*1.5:
                 game = False
 
     return plateau_jeu
