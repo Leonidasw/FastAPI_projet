@@ -37,7 +37,11 @@
             <div id="container"></div>
             <script src="../static/js/graphe.js"></script>
         </figure>
-
+        <p>Voir le score d'autre joueur.</p>
+        <form onsubmit="test()">
+            <input type="text" id="player" name="player" placeholder="Pseudo" required></input>
+            <button type="submit">Afficher</button>
+        </form>
         <br><br><br>
         <button class="logout-button" onclick="location.href='/logout'">
             Se déconnecter

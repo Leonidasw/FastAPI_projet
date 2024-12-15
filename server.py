@@ -325,21 +325,26 @@ async def score(request:Request):
         id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]
         cur.execute(f"INSERT INTO Score(id_user,difficulte_jeu,score_centiseconds,custom) VALUES({id_user},'{difficulty}','{score_centiseconds}','NULL')").fetchone()
 
+class Pseudo(BaseModel):
+    pseudo: str
 @app.post("/profile_page/get_score")
-async def get_score(request:Request):
+async def get_score(request:Request,player:Pseudo=None):
     """
     Hyp: Après une demande du code java script, récupère le score de l'utilisateur et le donne à java script
     """
-    username=request.cookies.get("username")
+    if player is None:
+        player=request.cookies.get("username")
+    else:
+        player=player.pseudo
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
-        score_facile = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}' and Score.difficulte_jeu=='facile' ORDER BY Score.date_jeu ASC").fetchall()
-        score_moyen = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}' and Score.difficulte_jeu=='moyen' ORDER BY Score.date_jeu ASC").fetchall()
-        score_difficile = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{username}' and Score.difficulte_jeu=='difficile' ORDER BY Score.date_jeu ASC").fetchall()
+        score_facile = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{player}' and Score.difficulte_jeu=='facile' ORDER BY Score.date_jeu ASC").fetchall()
+        score_moyen = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{player}' and Score.difficulte_jeu=='moyen' ORDER BY Score.date_jeu ASC").fetchall()
+        score_difficile = cur.execute(f"SELECT Score.score_centiseconds FROM Score JOIN Joueur ON Score.id_user=Joueur.id_user WHERE Joueur.user_pseudo=='{player}' and Score.difficulte_jeu=='difficile' ORDER BY Score.date_jeu ASC").fetchall()
     facile = [score[0]//100 for score in score_facile]
     moyen = [score[0]//100 for score in score_moyen]
     difficile = [score[0]//100 for score in score_difficile]
-    return JSONResponse(content=[facile,moyen,difficile])
+    return JSONResponse(content=[facile,moyen,difficile,player])
 
 
 class Matrice(BaseModel):

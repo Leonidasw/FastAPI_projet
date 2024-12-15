@@ -1,17 +1,38 @@
-function get_score(){
-  const url = 'http://127.0.0.1:8000/profile_page/get_score'
-  fetch(url,{
-    method: "post",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-  .then(response => response.json())
-  .then(data => {publie_score(data)});
+window.onload = function() {
+  // Récupère l'URL actuelle
+  const urlParams = new URLSearchParams(window.location.search);
+  const player = urlParams.get('player');
+  get_score(player)
+}
+
+function get_score(player){
+  if (player===null){
+    const url = 'http://127.0.0.1:8000/profile_page/get_score'
+    fetch(url,{
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then(response => response.json())
+    .then(data => {publie_score(data)});
+  } else {
+    const url = 'http://127.0.0.1:8000/profile_page/get_score'
+    fetch(url,{
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ pseudo : player}),
+    })
+    .then(response => response.json())
+    .then(data => {publie_score(data)});
+  }
+
 }
 
 function publie_score(data){
-  [facile,moyen,difficile] = data
+  [facile,moyen,difficile,username] = data
   Highcharts.chart('container', {
 
     title: {
@@ -19,7 +40,7 @@ function publie_score(data){
     },
   
     subtitle: {
-      text: ''
+      text: 'Score de '+username
     },
   
     yAxis: {
@@ -76,5 +97,3 @@ function publie_score(data){
     }
   });
 }
-
-get_score()
