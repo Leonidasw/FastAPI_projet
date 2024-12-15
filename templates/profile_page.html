@@ -37,12 +37,12 @@
             <div id="container"></div>
             <script src="../static/js/graphe.js"></script>
         </figure>
-        <p>Voir le score d'autre joueur.</p>
         <form onsubmit="test()">
+            <p style="font-size: large;">Voir le score d'autre joueur:</p>
             <input type="text" id="player" name="player" placeholder="Pseudo" required></input>
-            <button type="submit">Afficher</button>
+            <button type="submit" id="affiche">Afficher</button>
         </form>
-        <br><br><br>
+        <br>
         <button class="logout-button" onclick="location.href='/logout'">
             Se déconnecter
             <span class="arrow">←</span> <!-- Left-pointing arrow -->

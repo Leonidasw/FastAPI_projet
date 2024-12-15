@@ -320,6 +320,8 @@ async def score(request:Request):
     difficulty=request.cookies.get("difficulty")
     data = await request.json()
     score_centiseconds = data["score"]
+    if score_centiseconds <= 0:
+        return 
     with sqlite3.connect(dbpath) as connection:
         cur = connection.cursor()
         id_user=cur.execute(f"SELECT id_user FROM Joueur WHERE user_pseudo=='{username}'").fetchone()[0]

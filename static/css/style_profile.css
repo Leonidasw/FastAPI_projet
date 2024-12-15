@@ -26,6 +26,31 @@ body {
   }
 }
 
+#player {
+  text-align: left;
+    font: 0.9em sans-serif;
+    padding: 0.3em; /* Equal padding on all sides */
+    padding-left: 1.5em; /* Additional padding for the left side */
+    margin: 1em;
+    height: 2em;
+    width: 15em;
+    border-radius: 1.5em;
+}
+#affiche {
+  height:3em;
+  width:7em;
+  border-radius: 1.5em;
+  background: white;
+  font-size: medium;
+  font: 0.9em sans-serif;
+  transition: 200ms ease-in-out;
+}
+
+#affiche:hover {
+  transition: 200ms ease-in-out;
+  color: rgb(2, 152, 2);
+}
+
 
 
 #demineurButton {
