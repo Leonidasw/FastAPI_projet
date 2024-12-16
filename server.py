@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import Form, Response
-from fastapi import FastAPI, Request # import de la classe FastAPI
+from fastapi import FastAPI, Request, WebSocket # import de la classe FastAPI
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import Depends, FastAPI, HTTPException
@@ -467,5 +467,59 @@ async def get_mine(request:Request)->str:
         return "Erreur"
     return plateau_jeu
 
+import asyncio
+from grove.grove_thumb_joystick import GroveThumbJoystick
+from grove.helper import SlotHelper
+import time
+
+# Fonction pour initialiser et lire les données du joystick
+async def lire_joystick(websocket: WebSocket):
+    sh = SlotHelper(SlotHelper.ADC)
+    pin = 0
+    sensor = GroveThumbJoystick(pin)
+
+    matrice = [[0 for i in range(10)] for j in range(10)]
+    position = [0, 0]
+    press = True
+    x_pred, y_pred = 0, 0
+
+    print("Joystick initialisé. Envoi des données en cours...")
+    while True:
+        try:
+            x, y = sensor.value
+            if x > 900:
+                press = not press
+                x = 500
+                time.sleep(0.1)
+            x, y = (x // 10 - 50) * 4, (y // 10 - 50) * 4
+            vitesse_x = calculer_vitesse(x)
+            vitesse_y = calculer_vitesse(y)
+
+            nouvelle_position, deplacement_possible = deplacement(position, [x, y], len(matrice), vitesse_x, vitesse_y, x_pred, y_pred)
+
+            if deplacement_possible:
+                position = nouvelle_position
+
+            x_pred, y_pred = x, y
+            int_position = [int(position[0]), int(position[1])]
+            print("\nPosition actuelle : ", int_position)
+
+            # Envoi des données au client via WebSocket
+            await websocket.send_json({
+                "position": int_position,
+                "press": press
+            })
+
+            time.sleep(0.05)  # Pause de 50 ms
+        except Exception as e:
+            print("Erreur lors de la lecture du joystick :", e)
+            break
+
+# WebSocket pour transmettre les données du joystick
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    await lire_joystick(websocket)
+
 if __name__ == "__main__":
-    uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug
+    uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug<
