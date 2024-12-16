@@ -440,34 +440,45 @@ def plateau_jeu_possible_difficile(taille, nb_mines, case_joueur):
     - list: Le plateau de jeu configuré.
     """
     jeu_possible=False
-    j=0
     while not jeu_possible:
-        j+=1
         case_joueur=case_depart(case_joueur, taille)
         case_U=liste_voisins(case_joueur, taille)+[(case_joueur[0],case_joueur[1])]
-        plateau_jeu = init_plateau_mine(taille, nb_mines,case_U)
-        plateau_statut = init_statut_plateau(taille)
         
-        for case in case_U:
-            decouvre_case(case, plateau_jeu, plateau_statut)
-        decouvre_0_recursif(plateau_jeu, plateau_statut, 0)
+        resol=True
+        while resol:
+            plateau_jeu = init_plateau_mine(taille, nb_mines,case_U)
+            plateau_statut = init_statut_plateau(taille)
+            
+            for case in case_U:
+                decouvre_case(case, plateau_jeu, plateau_statut)
+            decouvre_0_recursif(plateau_jeu, plateau_statut, 0)
+            
+            nb_uncovered=0
+            for ligne in range(len(plateau_statut)):
+                for case in range(len(plateau_statut[ligne])):
+                    if plateau_statut[ligne][case] == Status.UNCOVERED:
+                        nb_uncovered+=1
+                        
+            if nb_uncovered!=(taille**2)-nb_mines :
+                resol=False
         
         robot_action_simple(plateau_jeu, plateau_statut)
-        
         robot_action_complexe(plateau_jeu, plateau_statut)
+        
         game=True
         while game:
             plateau_statut_pred=plateau_statut
             robot_action_simple(plateau_jeu, plateau_statut)
             robot_action_complexe(plateau_jeu, plateau_statut)
             decouvre_0_recursif(plateau_jeu,plateau_statut,0)
+            
             nb_uncovered=0
             for ligne in range(len(plateau_statut)):
                 for case in range(len(plateau_statut[ligne])):
                     if plateau_statut[ligne][case] == Status.UNCOVERED:
                         nb_uncovered+=1
+                        
             if nb_uncovered==(taille**2)-nb_mines :
-                print("win dure")
                 jeu_possible=True
                 game=False
             elif plateau_statut_pred==plateau_statut:
@@ -491,9 +502,25 @@ def plateau_jeu_possible_facil(taille, nb_mines, case_joueur):
     while not jeu_possible:
         case_joueur=case_depart(case_joueur, taille)
         case_U=liste_voisins(case_joueur, taille)+[(case_joueur[0],case_joueur[1])]
-        plateau_jeu = init_plateau_mine(taille, nb_mines,case_U)
-        plateau_statut = init_statut_plateau(taille)
         
+        resol=True
+        while resol:
+            plateau_jeu = init_plateau_mine(taille, nb_mines,case_U)
+            plateau_statut = init_statut_plateau(taille)
+            
+            for case in case_U:
+                decouvre_case(case, plateau_jeu, plateau_statut)
+            decouvre_0_recursif(plateau_jeu, plateau_statut, 0)
+            
+            nb_uncovered=0
+            for ligne in range(len(plateau_statut)):
+                for case in range(len(plateau_statut[ligne])):
+                    if plateau_statut[ligne][case] == Status.UNCOVERED:
+                        nb_uncovered+=1
+                        
+            if nb_uncovered!=(taille**2)-nb_mines :
+                resol=False
+
         for case in case_U:
             decouvre_case(case, plateau_jeu, plateau_statut)
         decouvre_0_recursif(plateau_jeu, plateau_statut, 0)
