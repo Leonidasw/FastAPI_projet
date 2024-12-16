@@ -102,10 +102,11 @@ body {
 
 
 .floater {
+    padding-left: 4em;
+    padding-right: 4em;
+    background-position: center;
     justify-content: center;
     text-align: center;
-    width:30em;
-    height:50em;
     background: radial-gradient(rgba(0,0,0,0), rgba(212, 207, 207, 0.6));
     backdrop-filter: blur(3px);
     border-radius: 1em;
@@ -141,3 +142,13 @@ body {
   .cell.mine {
     background-color: #ff4d4d;
   }
+
+#jouer {
+  height:3em;
+  padding: 0.8em;
+  border-radius: 1.5em;
+  background: white;
+  font-size: medium;
+  font: 0.9em sans-serif;
+  transition: 200ms ease-in-out;
+}

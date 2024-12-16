@@ -19,17 +19,21 @@
           </ul>
         </div>
       </div>
-    <p>Customiser un plateau de jeu</p>
-    <label for="range_t">Selectionner une taille: </label>
-    <p id="nb_mine">Nombre de mine: </p>
-    <input id='range_t' type="range" min="4" max="15" value="5">
-    <p id="demo"></p>
-    <div id="game-container"></div>
+    <div class="floater">
+      <p>Customiser un plateau de jeu</p>
+      <label for="range_t">Selectionner une taille: </label>
+      <p id="nb_mine">Nombre de mine: </p>
+      <input id='range_t' type="range" min="5" max="15" value="10">
+      <p id="demo"></p>
+      <div id="game-container"></div>
+      <br>
+      <form action="/custom_create/done" method="post" onsubmit="sauvegarde()">
+          <button type="submit">Sauvegarder</button>
+      </form>
+      <br>
+    </div>
+    <br><br>
+    <button id="jouer" onclick="location.href='/custom_create/play'">Jouer à des custom démineur</button>
     <script src="../static/js/custom.js"></script>
-    <br>
-    <form action="/custom_create/done" method="post" onsubmit="sauvegarde()">
-        <button type="submit">Sauvegarder</button>
-    </form>
-    <a href="/custom_create/play">Jouer à des custom démineur</a>
 </body>
 </html>

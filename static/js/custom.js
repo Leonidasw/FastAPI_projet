@@ -10,8 +10,8 @@ window.onload = function() {
 
 const slider = document.getElementById("range_t");
 const output = document.getElementById("demo");
-demineur("5")
-output.innerHTML = "5x5";
+demineur("10")
+output.innerHTML = "10x10";
 slider.oninput = () => {
     const size = parseInt(slider.value); // Get slider value
     demineur(size); // Call demineur with variables
