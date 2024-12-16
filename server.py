@@ -434,7 +434,7 @@ def play(request:Request):
     )
 
 from init_champ import init_compte, init_plateau_mine, liste_voisins
-from creation_plateau_demineur import plateau_jeu_possible
+from creation_plateau_demineur import plateau_jeu_possible_facil
 
 @app.get("/demineur/get_mine")
 async def get_mine(request:Request)->str:
@@ -448,7 +448,7 @@ async def get_mine(request:Request)->str:
         case_joueur=(0,0)
         case_U= liste_voisins(case_joueur, taille)+[case_joueur]
         #plateau_jeu = str(init_plateau_mine(taille, nb_mines,case_U)) 
-        plateau_jeu = str(plateau_jeu_possible(taille,nb_mines,[0,0]))
+        plateau_jeu = str(plateau_jeu_possible_facil(taille,nb_mines,[0,0]))
     elif difficulty=="moyen":
         nb_mines = 10*10*0.25
         taille = 10
