@@ -308,36 +308,47 @@ then close all select boxes:*/
 document.addEventListener("click", closeAllSelect);
 
 // Connexion au WebSocket
-const socket = new WebSocket("ws:///127.0.0.1:8000/ws");
+const socket = new WebSocket("ws://127.0.0.1:8000/ws");
 
 // Fonction appelée pour utiliser les données du joystick
-function utiliserDonneesJoystick(x, y){
-    console.log("Données du joystick :", { x, y });
-    // Ajoute ici la logique avec x et y
+function utiliserDonneesJoystick(x, y) {
+    console.log({ x, y });
+    // Ajoutez ici votre logique pour traiter les données du joystick
+}
+
+// Fonction appelée lorsqu'un bouton est appuyé
+function boutonAppuye() {
+    console.log("Le bouton a été appuyé !");
+    // Ajoutez ici votre logique pour traiter l'appui sur le bouton
 }
 
 // Lorsqu'un message est reçu depuis le WebSocket
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data); // Parse les données JSON
-    console.log(data)
-    const x = data.position[0];
-    const y = data.position[1];
-
-    // Exécute la fonction avec les coordonnées
-    utiliserDonneesJoystick(x, y);
+socket.onmessage = function (event) {
+    try {
+        const data = JSON.parse(event.data); // Parse les données JSON
+        // Vérifie si c'est une donnée de position ou un événement bouton
+        if (data.position) {
+            const [x, y] = data.position;
+            utiliserDonneesJoystick(x, y);
+        } else if (data.event === "button_pressed") {
+            boutonAppuye();
+        }
+    } catch (error) {
+        console.error("Erreur lors du traitement du message WebSocket :", error);
+    }
 };
 
 // Gestion des erreurs
-socket.onerror = function(error) {
+socket.onerror = function (error) {
     console.error("Erreur WebSocket :", error);
 };
 
 // Lorsqu'une connexion est établie
-socket.onopen = function() {
+socket.onopen = function () {
     console.log("Connexion WebSocket ouverte.");
 };
 
 // Lorsqu'une connexion est fermée
-socket.onclose = function() {
-    console.log("Connexion WebSocket fermée.");
+socket.onclose = function () {
+    console.log("Connexion WebSocket fermée.");
 };
