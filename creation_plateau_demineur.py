@@ -202,31 +202,6 @@ def nb_voisin_MARK(coord:tuple,plateau_statut:list)->int:
         if plateau_statut[x_voisin][y_voisin]==Status.MARK:
             nb+=1
     return nb
-def decouvre_0(plateau_jeu:list,plateau_statut:list):
-    """
-    Description:
-    Découvre en cascade toutes les cases adjacentes ayant 0 mines autour d'elles.
-
-    Paramètres:
-    - plateau_jeu (list): Le plateau de jeu contenant les valeurs des cases.
-    - plateau_statut (list): Le plateau des statuts des cases.
-
-    Retourne:
-    - None
-    """
-    taille:int=len(plateau_jeu)
-    action:int=1
-    while action!=0:
-        action=0
-        for ligne in range(len(plateau_statut)):
-            for case in range(len(plateau_statut[ligne])):
-                if plateau_statut[ligne][case] == Status.UNCOVERED and plateau_jeu[ligne][case] == 0:
-                    voisins:list = liste_voisins((ligne,case), taille)
-                    for voisin in voisins:
-                        x_voisin, y_voisin = voisin
-                        if plateau_statut[x_voisin][y_voisin] == Status.COVERED:
-                            plateau_statut[x_voisin][y_voisin]=Status.UNCOVERED
-                            action+=1
 
 def decouvre_0_recursif(plateau_jeu:list,plateau_statut:list, action:int):
     """
@@ -255,7 +230,7 @@ def decouvre_0_recursif(plateau_jeu:list,plateau_statut:list, action:int):
         return None
     return decouvre_0_recursif(plateau_jeu, plateau_statut,0)
 
-def robot_action_simple(plateau, plateau_statut):
+def robot_action_simple(plateau:list, plateau_statut:list):
     """
     Description:
     Applique une stratégie simple pour découvrir ou marquer des cases en fonction des informations disponibles.
@@ -295,7 +270,7 @@ def robot_action_simple(plateau, plateau_statut):
                                 decouvre_case(case, plateau, plateau_statut)
                                 action+=1
                                 
-def robot_action_complexe(plateau, plateau_statut):
+def robot_action_complexe(plateau:list, plateau_statut:list):
     """
     Description:
     Parcourt tout le plateau et vérifie chaque case découverte pour appliquer une logique avancée.
@@ -312,7 +287,7 @@ def robot_action_complexe(plateau, plateau_statut):
             if plateau_statut[x][y] == Status.UNCOVERED:
                 verifier_case([x, y], plateau, plateau_statut)
 
-def verifier_case(case_A, plateau, plateau_statut):
+def verifier_case(case_A:list, plateau:list, plateau_statut:list):
     """
     Description:
     Vérifie une case découverte et prépare les données nécessaires pour des calculs plus complexes.
@@ -330,9 +305,9 @@ def verifier_case(case_A, plateau, plateau_statut):
     
     uncovered_voisins = voisin_voisin(case_A,couvertes, plateau, plateau_statut)
     
-    calcul(case_A, uncovered_voisins, plateau, plateau_statut)
+    calcul(case_A, couvertes, uncovered_voisins, plateau, plateau_statut)
 
-def voisin_voisin(case_A,couvertes, plateau, plateau_statut):
+def voisin_voisin(case_A:list,couvertes:list, plateau:list, plateau_statut:list):
     """
     Description:
     Retourne toutes les cases découvertes autour des cases couvertes spécifiées.
@@ -353,7 +328,7 @@ def voisin_voisin(case_A,couvertes, plateau, plateau_statut):
                               if plateau_statut[voisin[0]][voisin[1]] == Status.UNCOVERED and [voisin[0],voisin[1]]!=[case_A[0],case_A[1]]]
     return uncovered_voisins
 
-def voisin_commun(case_A, case_B, plateau_statut):
+def voisin_commun(case_A:list, case_B:list, plateau_statut:list):
     """
     Description:
     Retourne la liste des cases couvertes communes entre les voisins de case_A et case_B.
@@ -372,7 +347,7 @@ def voisin_commun(case_A, case_B, plateau_statut):
                  if plateau_statut[voisin[0]][voisin[1]] == Status.COVERED]
     return list(set(voisins_A) & set(voisins_B))  # Intersection des deux listes
 
-def calcul(case_A, uncovered_voisins, plateau, plateau_statut):
+def calcul(case_A:list, couvertes:list, uncovered_voisins:list, plateau:list, plateau_statut:list):
     """
     Description:
     Applique la logique complexe en comparant case_A avec ses voisins uncovered (caseB).
@@ -420,7 +395,7 @@ def calcul(case_A, uncovered_voisins, plateau, plateau_statut):
         if nb_case_covered_B==nb_voisin_commun_AB:
             mark_complexe(case_A, case_B, nb_mines_adj_A, nb_voisin_commun_AB, resultat, nb_mark_adj_A, plateau, plateau_statut)
         
-def mark_complexe(case_A, case_B, nb_mines_adj_A, nb_voisin_commun_AB, resultat, nb_mark_adj_A, plateau, plateau_statut):
+def mark_complexe(case_A:list, case_B:list, nb_mines_adj_A:int, nb_voisin_commun_AB:int, resultat:int, nb_mark_adj_A:int, plateau:list, plateau_statut:list):
     """
     Description:
     Traite les cas où le résultat n'est pas égal à 0.
@@ -451,7 +426,7 @@ def mark_complexe(case_A, case_B, nb_mines_adj_A, nb_voisin_commun_AB, resultat,
             if case not in voisins_communs:
                 mark_stat((case[0],case[1]), plateau, plateau_statut)
 
-def plateau_jeu_possible(taille, nb_mines, case_joueur):
+def plateau_jeu_possible_difficile(taille, nb_mines, case_joueur):
     """
     Description:
     Génère un plateau de jeu jouable avec une configuration valide de mines et de cases découvertes.
@@ -465,9 +440,11 @@ def plateau_jeu_possible(taille, nb_mines, case_joueur):
     - list: Le plateau de jeu configuré.
     """
     jeu_possible=False
+    j=0
     while not jeu_possible:
+        j+=1
         case_joueur=case_depart(case_joueur, taille)
-        case_U=liste_voisins(case_joueur, taille)+[case_joueur]
+        case_U=liste_voisins(case_joueur, taille)+[(case_joueur[0],case_joueur[1])]
         plateau_jeu = init_plateau_mine(taille, nb_mines,case_U)
         plateau_statut = init_statut_plateau(taille)
         
@@ -478,24 +455,55 @@ def plateau_jeu_possible(taille, nb_mines, case_joueur):
         robot_action_simple(plateau_jeu, plateau_statut)
         
         robot_action_complexe(plateau_jeu, plateau_statut)
-        i=1
         game=True
         while game:
+            plateau_statut_pred=plateau_statut
             robot_action_simple(plateau_jeu, plateau_statut)
             robot_action_complexe(plateau_jeu, plateau_statut)
             decouvre_0_recursif(plateau_jeu,plateau_statut,0)
-            nb_mark=0
-            nb_covered=0
+            nb_uncovered=0
             for ligne in range(len(plateau_statut)):
                 for case in range(len(plateau_statut[ligne])):
-                    if plateau_statut[ligne][case] == Status.COVERED:
-                        nb_covered+=1
-                    if plateau_statut[ligne][case] == Status.MARK:
-                        nb_mark+=1
-            i+=1
-            if nb_mark==nb_mines and 0==nb_covered:
+                    if plateau_statut[ligne][case] == Status.UNCOVERED:
+                        nb_uncovered+=1
+            if nb_uncovered==(taille**2)-nb_mines :
+                print("win dure")
                 jeu_possible=True
                 game=False
-            elif i==int((taille**2)*1.1):
+            elif plateau_statut_pred==plateau_statut:
                 game=False
+    return plateau_jeu
+
+def plateau_jeu_possible_facil(taille, nb_mines, case_joueur):
+    """
+    Description:
+    Génère un plateau de jeu avec une configuration simplifiée pour réussir automatiquement dans un mode facile.
+
+    Paramètres:
+    - taille (int): La taille du plateau.
+    - nb_mines (int): Le nombre de mines à placer.
+    - case_joueur (list): Les coordonnées initiales de la case sélectionnée par le joueur.
+
+    Retourne:
+    - list: Le plateau de jeu configuré.
+    """
+    jeu_possible=False
+    while not jeu_possible:
+        case_joueur=case_depart(case_joueur, taille)
+        case_U=liste_voisins(case_joueur, taille)+[(case_joueur[0],case_joueur[1])]
+        plateau_jeu = init_plateau_mine(taille, nb_mines,case_U)
+        plateau_statut = init_statut_plateau(taille)
+        
+        for case in case_U:
+            decouvre_case(case, plateau_jeu, plateau_statut)
+        decouvre_0_recursif(plateau_jeu, plateau_statut, 0)
+        
+        robot_action_simple(plateau_jeu, plateau_statut)
+        nb_uncovered=0
+        for ligne in range(len(plateau_statut)):
+            for case in range(len(plateau_statut[ligne])):
+                if plateau_statut[ligne][case] == Status.UNCOVERED:
+                    nb_uncovered+=1
+        if nb_uncovered==(taille**2)-nb_mines :
+            jeu_possible=True
     return plateau_jeu
