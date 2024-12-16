@@ -468,10 +468,13 @@ async def get_mine(request:Request)->str:
         return "Erreur"
     return plateau_jeu
 
+<<<<<<< HEAD
 from fastapi.staticfiles import StaticFiles
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+=======
+>>>>>>> 59b0200e464b6abc82642810564d31ee28b5d8d9
 import asyncio
 from grove.grove_thumb_joystick import GroveThumbJoystick
 from grove.helper import SlotHelper

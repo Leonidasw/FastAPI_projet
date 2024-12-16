@@ -338,5 +338,5 @@ socket.onopen = function() {
 
 // Lorsqu'une connexion est fermée
 socket.onclose = function() {
-    console.log("Connexion WebSocket fermée.");
+    console.log("Connexion WebSocket fermée.");
 };
