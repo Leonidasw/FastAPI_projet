@@ -6,7 +6,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from hashlib import sha256
 from contextlib import asynccontextmanager
 import sqlite3
@@ -468,17 +467,106 @@ async def get_mine(request:Request)->str:
         return "Erreur"
     return plateau_jeu
 
-<<<<<<< HEAD
-from fastapi.staticfiles import StaticFiles
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-=======
->>>>>>> 59b0200e464b6abc82642810564d31ee28b5d8d9
 import asyncio
 from grove.grove_thumb_joystick import GroveThumbJoystick
 from grove.helper import SlotHelper
 import time
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Grove Base Hat for the Raspberry Pi, used to connect grove sensors.
+# Copyright (C) 2018  Seeed Technology Co.,Ltd.
+
+import RPi.GPIO as GPIO
+import time
+
+# Configuration de la GPIO
+GPIO.setmode(GPIO.BCM)  # Utilisation du mode BCM pour référencer les broches
+GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Broche 2 (GPIO A2) en entrée avec résistance de pull-up
+lst=[0]
+i=9
+def modif(liste):
+    lst[0]+=1
+def bouton_appuye(channel):
+    modif(lst)
+    print(i)
+    print("Le bouton a été appuyé !")
+
+# Détection de l'appui sur le bouton
+GPIO.add_event_detect(5, GPIO.FALLING, callback=bouton_appuye, bouncetime=300)
+
+
+import math
+import sys
+import time
+from grove.adc import ADC
+
+__all__ = ['GroveThumbJoystick']
+
+class GroveThumbJoystick(object):
+    '''
+    Grove Thumb Joystick class
+
+    Args:
+        channel(int): number of analog pin/channel the sensor connected.
+    '''
+    def __init__(self, channel):
+        self.channelX = channel
+        self.channelY = channel + 1
+        self.adc = ADC()
+
+    @property
+    def value(self):
+        '''
+        Get the water strength value
+
+        Returns:
+            (pair): x-ratio, y-ratio, all are 0(0.0%) - 1000(100.0%)
+        '''
+        return self.adc.read(self.channelX), self.adc.read(self.channelY)
+
+Grove = GroveThumbJoystick
+
+matrice = [[0 for i in range(10)] for j in range(10)]
+
+position = [0, 0]
+
+def deplacement(position, vecteur, taille, vitesse_x, vitesse_y,x_pred,y_pred):
+    """
+    Met à jour la position dans la matrice en fonction du vecteur de déplacement.
+    - `position` : Coordonnées actuelles [ligne, colonne].
+    - `vecteur` : Vecteur de déplacement (x, y) compris entre -100 et 100.
+    - `taille` : Taille de la matrice (taille x taille).
+    """
+    if x_pred == 0 and y_pred == 0:
+        dx = 1 if vecteur[0] > 33 else -1 if vecteur[0] < -33 else 0
+        dy = 1 if vecteur[1] > 33 else -1 if vecteur[1] < -33 else 0
+    else:
+        dx = 0.25 if vecteur[0] > 33 else -0.25 if vecteur[0] < -33 else 0
+        dy = 0.25 if vecteur[1] > 33 else -0.25 if vecteur[1] < -33 else 0
+
+    nouvelle_position = [
+        position[0] + dx*vitesse_x,  
+        position[1] + dy*vitesse_y   
+    ]
+
+    nouvelle_position[0] = nouvelle_position[0]%taille
+    nouvelle_position[1] = nouvelle_position[1]%taille
+    
+    return nouvelle_position, (dx != 0 or dy != 0)  
+
+def calculer_vitesse(nb):
+    """
+    Détermine la vitesse en fonction de l'inclinaison du joystick.
+    - Vitesse normale (1 case/sec) : Inclinaison modérée (\( -50 \leq x, y \leq 50 \)).
+    - Vitesse rapide (1 case/0.5 sec) : Inclinaison forte (\( x > 50 \) ou \( x < -50 \), \( y > 50 \) ou \( y < -50 \)).
+    """
+    if abs(nb) > 66 :
+        return 1 
+    return 0.5  
 
 # Fonction pour initialiser et lire les données du joystick
 async def lire_joystick(websocket: WebSocket):
@@ -490,10 +578,8 @@ async def lire_joystick(websocket: WebSocket):
     position = [0, 0]
     press = True
     x_pred, y_pred = 0, 0
-
-    print("Joystick initialisé. Envoi des données en cours...")
-    while True:
-        try:
+    try:
+         while True:
             x, y = sensor.value
             if x > 900:
                 press = not press
@@ -510,7 +596,6 @@ async def lire_joystick(websocket: WebSocket):
 
             x_pred, y_pred = x, y
             int_position = [int(position[0]), int(position[1])]
-            print("\nPosition actuelle : ", int_position)
 
             # Envoi des données au client via WebSocket
             await websocket.send_json({
@@ -518,17 +603,17 @@ async def lire_joystick(websocket: WebSocket):
                 "press": press
             })
 
-            time.sleep(0.05)  # Pause de 50 ms
-        except Exception as e:
-            print("Erreur lors de la lecture du joystick :", e)
-            break
+            await asyncio.sleep(0.05)  # Pause de 50 ms
+    except WebSocketDisconnect:
+        print("partir")
+    except Exception as e:
+        print("Erreur lors de la lecture du joystick :", e)
 
 # WebSocket pour transmettre les données du joystick
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     await lire_joystick(websocket)
-
 
 if __name__ == "__main__":
     uvicorn.run(app) # lancement du serveur HTTP + WSGI avec les options de debug<

@@ -311,7 +311,7 @@ document.addEventListener("click", closeAllSelect);
 const socket = new WebSocket("ws:///127.0.0.1:8000/ws");
 
 // Fonction appelée pour utiliser les données du joystick
-function utiliserDonneesJoystick(x, y) {
+function utiliserDonneesJoystick(x, y){
     console.log("Données du joystick :", { x, y });
     // Ajoute ici la logique avec x et y
 }
@@ -319,8 +319,9 @@ function utiliserDonneesJoystick(x, y) {
 // Lorsqu'un message est reçu depuis le WebSocket
 socket.onmessage = function(event) {
     const data = JSON.parse(event.data); // Parse les données JSON
-    const x = data.x;
-    const y = data.y;
+    console.log(data)
+    const x = data.position[0];
+    const y = data.position[1];
 
     // Exécute la fonction avec les coordonnées
     utiliserDonneesJoystick(x, y);
@@ -338,5 +339,5 @@ socket.onopen = function() {
 
 // Lorsqu'une connexion est fermée
 socket.onclose = function() {
-    console.log("Connexion WebSocket fermée.");
+    console.log("Connexion WebSocket fermée.");
 };
