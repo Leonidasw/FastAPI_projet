@@ -257,8 +257,15 @@ document.addEventListener("keydown", (e) => {
     case "ArrowRight":
       if (currentCol < cols - 1) currentCol++;
       break;
+    case " ":
+      revealCell(currentRow,currentCol)
+      break;
+    case "0":
+      toggleFlag(currentRow,currentCol)
+      break;
   }
   updateCursor(currentRow, currentCol);
+  console.log(currentRow,currentCol)
 });
 
 // Initialisation du curseur
