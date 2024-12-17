@@ -218,6 +218,51 @@ function revealNeighborsIfFlagsMatch(row, col) {
   }
 }
 
+// Ajout de l'élément curseur dans le conteneur
+const cursor = document.createElement("div");
+cursor.classList.add("cursor");
+document.getElementById("game-container").appendChild(cursor);
+
+function updateCursor(row, col) {
+  const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+  if (!cell) return;
+
+  const rect = cell.getBoundingClientRect(); // Position absolue de la cellule
+  const containerRect = document.getElementById("game-container").getBoundingClientRect(); // Position absolue du conteneur
+
+  // Calculer les positions relatives au conteneur
+  const relativeLeft = rect.left - containerRect.left;
+  const relativeTop = rect.top - containerRect.top;
+
+  cursor.style.width = `${rect.width}px`;
+  cursor.style.height = `${rect.height}px`;
+  cursor.style.left = `${relativeLeft}px`;
+  cursor.style.top = `${relativeTop}px`;
+}
+
+// Gestion des déplacements avec les touches directionnelles
+let currentRow = 0, currentCol = 0;
+
+document.addEventListener("keydown", (e) => {
+  switch (e.key) {
+    case "ArrowUp":
+      if (currentRow > 0) currentRow--;
+      break;
+    case "ArrowDown":
+      if (currentRow < rows - 1) currentRow++;
+      break;
+    case "ArrowLeft":
+      if (currentCol > 0) currentCol--;
+      break;
+    case "ArrowRight":
+      if (currentCol < cols - 1) currentCol++;
+      break;
+  }
+  updateCursor(currentRow, currentCol);
+});
+
+// Initialisation du curseur
+updateCursor(0, 0);
 
 }
 
